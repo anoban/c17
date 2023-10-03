@@ -1,0 +1,194 @@
+#include <limits.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Self referential structs need a forward declaration since when the self reference is analyzed by the compiler, it won't be able to
+// figure out its type, since the type is used inside its declaration.
+
+// There are two ways to workaround this problem:
+// 1) typedef struct node_t node_t;
+// 2) Or one could annotate the self reference as a struct.
+
+typedef struct node_t {
+        struct node_t* left;  // Zero
+        struct node_t* right; // One
+        int64_t  byte;   // This serves a cocktail of purposes, besides registering the byte for leaf nodes. Intentionally using a 64 bit
+                         // signed integer.
+                         // Positive values in the range 0 to 255 mark a leaf node.
+                         // Negative values: Lookup enum LINKNODETYPE.
+                         // Takes up 8 bytes, so will likely eliminate the need for padding bytes too.
+        uint64_t weight; // Frequency in the case of leaf nodes (nodes that directly represent bytes)
+                         // Sum of the frequencies of child nodes, in the case of linking nodes.
+} node_t;
+
+// We won't be hooking up nodes without children to parents, so those variants need not to be here.
+typedef enum link_t {
+    NPSC = -3, // No Parent, Single Child.
+    NPTC,      // No Parent, Two Children.
+    PTC,       // Parent, Two Children.
+} link_t;
+
+// Oriented to sort in ascending order.
+// context must be the predicate's first argument, function signature must be in the following form:
+// compare(context, (void*) &elem1, (void*) &elem2);
+// If ascending sort is desired, just swap the return values -1 and 1.
+int32_t static inline __cdecl predicate(
+    _In_reads_(1) void* restrict context, _In_reads_(1) const void* restrict this, _In_reads_(1) const void* restrict next
+) {
+    const uint64_t* frequencies = context; // aliasing a restricted pinter :(
+    uint8_t         __this = *((uint8_t*) this), __next = *((uint8_t*) next);
+    if (frequencies[__this] == frequencies[__next])
+        return 0;
+    else if (frequencies[__this] > frequencies[__next])
+        return 1;
+    else
+        return -1; // frequencies[__this] < frequencies[__next]
+}
+
+// The argument `frequencies` must be of length 256. The function assumes this by default and does no bound checks.
+void static inline __stdcall initialize_frequency_table(
+    _In_reads_bytes_(size) const uint8_t* restrict byte_stream,
+    const _In_ uint64_t size,
+    _In_reads_bytes_(2048) uint64_t* const restrict frequencies
+) {
+    for (uint64_t i = 0; i < size; ++i) frequencies[byte_stream[i]]++;
+    return;
+}
+
+// Say that our input contains all possible bytes at frequency > 1.
+// We'll then need 256 terminal nodes.
+// Each linking node will need 2 child nodes.
+// Total number of nodes (maximum possible) is 2N - 1 i.e = (256 * 2) - 1 = 511
+// Since we are willing to use 256 terminal nodes (again, we will never ever need nodes more than this. Sort of an overkill, but okay.)
+// The number of linker nodes will be 2N - 1 - N = (N - 1) i.e 255
+
+#define MAX_TOTAL_NODES 511LLU
+#define MAX_LEAF_NODES  256LLU
+#define MAX_LINK_NODES  255LLU
+
+// Sort the bytes array, using the frequencies of bytes in the byte stream as reference, and returns the offset of the first byte with
+// non-zero frequency. Uses UCRT's qsort internally. Caller does not need to initialize the `bytes` array.
+uint64_t static inline __stdcall sort_bytes(
+    _Inout_updates_bytes_all_(256) uint8_t* const restrict bytes,
+    _In_bytecount_(2048) const uint64_t* const restrict frequencies,
+    _In_ _CoreCrtSecureSearchSortCompareFunction predicate
+) {
+    for (uint64_t i = 0; i < 256; ++i) bytes[i] = (uint8_t) i; // Initialize the array with bytes 0 to 255.
+    qsort_s(bytes, 256U, 1U, predicate, frequencies);
+    // Find the first offset of the byte in sortedbytes, with the lowest non-zero frequency.
+    uint64_t firstnzbytepos = 0;
+    for (uint64_t i = 0; i < 256; ++i) {
+        if (frequencies[bytes[i]] > 0) {
+            firstnzbytepos = i;
+            break;
+        }
+    }
+    return firstnzbytepos;
+}
+
+int wmain(void) {
+    const char text[]           = "BIG BOB BITES A BAG OF BANANAS"; // the length shown in hover includes the null terminator.
+
+    uint64_t   frequencies[256] = { 0 };
+    initialize_frequency_table(text, strlen(text), frequencies);
+
+    // The bytes with higher frequencies need the lowest number of bits for encoding in order to make the space use minimal.
+    // Bytes that occur rarely like the non-printing characters in a text file, can be represented by comparatively larger number of bits,
+    // since we won't be using them that often.
+
+    // Traversing right in the Huffman tree, each edge bears a label 1
+    // Traversing left in the Huffman tree, each edge bears a label 0
+
+    // We can ignore all the bytes with frequency 0.
+
+    uint8_t  sortedbytes[256]; // Bytes sorted by frequency. (ascending order)
+    // The offset of the first byte in the sorted array, with non-zero frequency.
+    uint64_t firstnzbytepos = sort_bytes(sortedbytes, frequencies, predicate);
+
+    for (uint64_t i = 0; i < 256; ++i) printf_s("%d (%c): %llu\n", sortedbytes[i], sortedbytes[i], frequencies[sortedbytes[i]]);
+    printf_s(
+        "First non-zero offset is %llu and the byte with the lowest non-zero frequency is %c\n", firstnzbytepos, sortedbytes[firstnzbytepos]
+    );
+
+    node_t huffman_tree[MAX_TOTAL_NODES]; // This will be our Huffman tree, Just a plain array of node_t s on the stack.
+    memset(huffman_tree, 0U, MAX_TOTAL_NODES * sizeof(node_t));
+
+    // 256 - firstnzbytepos will give the number of needed leaf nodes.
+    const uint64_t n_leafnodes = 256 - firstnzbytepos; // Equal to the number of bytes with non-zero frequencies.
+
+    // First N nodes in huffman_tree will be leaf nodes.
+    // Initialize the leaf nodes. Works good :)
+
+    uint64_t       writecaret  = 0; // A caret to track the offset of the last initialized node in the huffman tree (node_t array).
+    for (uint64_t i = firstnzbytepos; /* Start from the first byte with non-zero frequency */ i < 256; ++i) {
+        huffman_tree[writecaret].byte   = sortedbytes[i];
+        huffman_tree[writecaret].weight = frequencies[sortedbytes[i]];
+        huffman_tree[writecaret].left = huffman_tree[writecaret].right = NULL;
+        // Since leaf nodes have nothing pointed by their arms, make these pointers NULL.
+        writecaret++;
+    }
+
+    // Now writecaret must be N
+    printf_s("%llu leaf nodes have been initialized\n", writecaret);
+
+    // Creating linker nodes, nodes with larger weights should be attached to the right arm.
+
+    uint64_t n_constructedlinks     = 0;                 // Number of linker nodes that have been constructed so far.
+    uint64_t n_neededlinks          = (n_leafnodes - 1); // = N - 1
+    uint64_t n_linkedleaves         = 0;                 // Number of leaf nodes that have been linked to a linker node.
+    int64_t  readcaret              = 0;                 // This caret needs to traverse through leaf nodes and link nodes.
+
+    // In the linking process, only the first link could be a trivial link between the first two leaf nodes.
+    // All the following linkings will require us to find the next node to be linked by finding the un-linked node with the lowest
+    // frequency.
+
+    // N + 1 th node in the array & 1st linker node.
+    huffman_tree[writecaret].left   = &huffman_tree[0]; // First node needs to be linked with the left arm of the linker node.
+    huffman_tree[writecaret].right  = &huffman_tree[1]; // Second node needs to be linked with the right arm of the linker node.
+    huffman_tree[writecaret].byte   = NPTC;
+    huffman_tree[writecaret].weight = huffman_tree[0].weight + huffman_tree[1].weight;
+
+    n_constructedlinks++;                               // First link node done.
+    writecaret++;
+    n_linkedleaves += 2;
+    readcaret      += 2;                                // We've already read the first two leaf nodes. Don't worry about them anymore.
+
+    // From all the nodes we have, find the two with the lowest frequencies, excluding the nodes that have been linked already.
+
+    while (n_neededlinks != n_constructedlinks) {
+        // If we had N leaf nodes in the tree, make the following nodes linker nodes. i.e starting from the offset N.
+        // Lower weighted linkers should be in the left.
+
+        uint64_t min_consolidated_weight = 0;
+        node_t*  next                    = NULL;
+
+        // Scanning through the nodes.
+        for (uint64_t i = 0; i < (2 * n_leafnodes) - 1 /* Nnumber of total nodes */; ++i) {
+            // The smallest cumulative weight in the tree, so far.
+            min_consolidated_weight = huffman_tree[writecaret - 1].weight;
+
+            // If there are nodes (including leaf nodes) with weights smaller than or equal to the min_consolidated_weight;
+            if (huffman_tree[i].weight <= min_consolidated_weight) {
+                // Create a now link node, linking it to the unlinked node with smallest weight.
+                huffman_tree[writecaret].byte = NPSC;
+                min_consolidated_weight = huffman_tree[writecaret].weight = min_consolidated_weight + huffman_tree[i].weight;
+                huffman_tree[writecaret].left                             = &huffman_tree[writecaret - 1];
+                huffman_tree[writecaret].right                            = NULL;
+                huffman_tree[writecaret - 1].byte                         = PTC; // Register that the previous node now has a parent.
+
+                n_constructedlinks++;
+            } else {
+                node_t* current = &huffman_tree[writecaret - 1];                 // Find the node with next smallest weight.
+                for (uint64_t i = 0; i < writecaret; ++i)
+                    if (current->weight < huffman_tree[i].weight) current = &huffman_tree[i];
+
+                huffman_tree[writecaret].byte = NPSC;
+                huffman_tree[writecaret].weight =
+            }
+        }
+    }
+
+    return 0;
+}
