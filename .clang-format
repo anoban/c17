@@ -689,12 +689,12 @@ IntegerLiteralSeparator:              # Format integer literal separators (' for
                                       # You can also specify a minimum number of digits (BinaryMinDigits, DecimalMinDigits, and HexMinDigits)
                                       # the integer literal must have in order for the separators to be inserted.
 # This is for C, as C does not recognize these separators!
-  Binary:           -1
-  BinaryMinDigits:  -1
-  Decimal:          -1
-  DecimalMinDigits: -1
-  Hex:              -1
-  HexMinDigits:     -1
+  Binary:           0
+  BinaryMinDigits:  0
+  Decimal:          0
+  DecimalMinDigits: 0
+  Hex:              0
+  HexMinDigits:     0
 
 KeepEmptyLinesAtTheStartOfBlocks: false  # If true, the empty line at the start of blocks is kept.
 # If set to true;                        If set to false;
@@ -769,8 +769,8 @@ PointerAlignment: Left
 PPIndentWidth:   -1                      # The number of columns to use for indentation of preprocessor statements. 
                                          # When set to -1 (default) IndentWidth is used also for preprocessor statements.
                                          
-QualifierAlignment: Custom               # Different ways to arrange specifiers and qualifiers (e.g. const/volatile).
-QualifierOrder: ['const', 'type', 'static', 'constexpr', 'inline']     
+QualifierAlignment: Leave                # Different ways to arrange specifiers and qualifiers (e.g. const/volatile).
+# QualifierOrder: ['const', 'type', 'static', 'constexpr', 'inline']     
 # Items to the left of 'type' will be placed to the left of the type and aligned in the order supplied. Items to the right of 'type'
 # will be placed to the right of the type and aligned in the order supplied.
 
