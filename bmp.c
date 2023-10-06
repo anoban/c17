@@ -332,77 +332,106 @@ static inline void print_bmp_info(_In_ const BMP* const restrict image) {
 // LUMINOSITY does LUM = (0.2126 R) + (0.7152 G) + (0.0722 B)
 typedef enum { AVERAGE, WEIGHTED_AVERAGE, LUMINOSITY, BINARY, FLATBINARY } RGBTOBWKIND;
 
-// pixel_buffer will be modified in place!
-static inline void to_blacknwhite(_In_ const BMP* image, _In_ const RGBTOBWKIND conversion_kind, _In_ const bool inplace) {
+// If inplace = true, return value can be safely ignored.
+static inline BMP to_blacknwhite(_In_ const BMP* image, _In_ const RGBTOBWKIND conversion_kind, _In_ const bool inplace) {
     // ___RGBQUAD encoding assumed.
+    BMP local = *image;
+    if (!inplace) {
+        local.pixel_buffer = malloc(image->fsize - 54);
+        if (!local.pixel_buffer) {
+            wprintf_s(L"Error in %s (%s, %d), malloc returned NULL\n", __FUNCTIONW__, __FILEW__, __LINE__);
+            return (BMP) {
+                .fsize = 0, .npixels = 0, .fhead = { 0, 0, 0, 0 },
+                        .infhead = { 0, 0, 0, 0, 0, RGB, 0, 0, 0, 0, 0 },
+                        .pixel_buffer = NULL
+            };
+        }
+        memcpy_s(local.pixel_buffer, local.fsize - 54, image->pixel_buffer, image->fsize - 54);
+    }
+
     switch (conversion_kind) {
         case AVERAGE :
-            for (uint64_t i = 0; i < image->npixels; ++i) {
-                image->pixel_buffer[i].BLUE = image->pixel_buffer[i].GREEN = image->pixel_buffer[i].RED =
-                    ((image->pixel_buffer[i].BLUE + image->pixel_buffer[i].GREEN + image->pixel_buffer[i].RED) / 3
-                    );                                                                                    // plain arithmetic mean
+            for (size_t i = 0; i < local.npixels; ++i) {
+                local.pixel_buffer[i].BLUE = local.pixel_buffer[i].GREEN = local.pixel_buffer[i].RED =
+                    ((local.pixel_buffer[i].BLUE + local.pixel_buffer[i].GREEN + local.pixel_buffer[i].RED) / 3); // plain arithmetic mean
             }
             break;
         case WEIGHTED_AVERAGE :
-            for (uint64_t i = 0; i < image->npixels; ++i) {
-                image->pixel_buffer[i].BLUE = image->pixel_buffer[i].GREEN = image->pixel_buffer[i].RED = // weighted average
-                    (uint8_t) ((image->pixel_buffer[i].BLUE * 0.299L) + (image->pixel_buffer[i].GREEN * 0.587L) +
-                               (image->pixel_buffer[i].RED * 0.114L));
+            for (size_t i = 0; i < local.npixels; ++i) {
+                local.pixel_buffer[i].BLUE = local.pixel_buffer[i].GREEN = local.pixel_buffer[i].RED =            // weighted average
+                    (uint8_t) ((local.pixel_buffer[i].BLUE * 0.299L) + (local.pixel_buffer[i].GREEN * 0.587L) +
+                               (local.pixel_buffer[i].RED * 0.114L));
             }
             break;
         case LUMINOSITY :
-            for (uint64_t i = 0; i < image->npixels; ++i) {
-                image->pixel_buffer[i].BLUE = image->pixel_buffer[i].GREEN = image->pixel_buffer[i].RED =
-                    (uint8_t) ((image->pixel_buffer[i].BLUE * 0.2126L) + (image->pixel_buffer[i].GREEN * 0.7152L) +
-                               (image->pixel_buffer[i].RED * 0.0722L));
+            for (size_t i = 0; i < local.npixels; ++i) {
+                local.pixel_buffer[i].BLUE = local.pixel_buffer[i].GREEN = local.pixel_buffer[i].RED =
+                    (uint8_t) ((local.pixel_buffer[i].BLUE * 0.2126L) + (local.pixel_buffer[i].GREEN * 0.7152L) +
+                               (local.pixel_buffer[i].RED * 0.0722L));
             }
             break;
         case BINARY :
-            for (uint64_t i = 0; i < image->npixels; ++i) {
-                image->pixel_buffer[i].BLUE  = image->pixel_buffer[i].BLUE > 128 ? 255 : 0;
-                image->pixel_buffer[i].GREEN = image->pixel_buffer[i].BLUE > 128 ? 255 : 0;
-                image->pixel_buffer[i].RED   = image->pixel_buffer[i].BLUE > 128 ? 255 : 0;
+            for (size_t i = 0; i < local.npixels; ++i) {
+                local.pixel_buffer[i].BLUE  = local.pixel_buffer[i].BLUE > 128 ? 255 : 0;
+                local.pixel_buffer[i].GREEN = local.pixel_buffer[i].BLUE > 128 ? 255 : 0;
+                local.pixel_buffer[i].RED   = local.pixel_buffer[i].BLUE > 128 ? 255 : 0;
             }
             break;
         case FLATBINARY :
             uint64_t value = 0;
-            for (uint64_t i = 0; i < image->npixels; ++i) {
-                value                       = (image->pixel_buffer[i].BLUE + image->pixel_buffer[i].GREEN + image->pixel_buffer[i].RED);
-                image->pixel_buffer[i].BLUE = image->pixel_buffer[i].GREEN = image->pixel_buffer[i].RED = (value / 3) > 128 ? 255 : 0;
+            for (size_t i = 0; i < local.npixels; ++i) {
+                value                      = (local.pixel_buffer[i].BLUE + local.pixel_buffer[i].GREEN + local.pixel_buffer[i].RED);
+                local.pixel_buffer[i].BLUE = local.pixel_buffer[i].GREEN = local.pixel_buffer[i].RED = (value / 3) > 128 ? 255 : 0;
             }
             break;
     }
-    return;
+    return local;
 }
 
-// the color palette in pixel buffer is in BGR order NOT RGB!
-
+// The color palette in pixel buffer is in BGR order NOT RGB!
 typedef enum { REMRED, REMGREEN, REMBLUE, REMRG, REMRB, REMGB } RMCOLOURKIND;
 
-// buffer will be modified in-place.
-static inline void remove_color(_In_ uint8_t* restrict pixbuffer, _In_ const uint64_t size, _In_ const RMCOLOURKIND rmcolor) {
-    // tested, works fine :))
-    int8_t* pixels_start = (pixbuffer + 54);
+// If inplace = true, return value can be safely ignored.
+static inline BMP remove_color(_In_ const BMP* image, _In_ const RMCOLOURKIND rmcolor, _In_ const bool inplace) {
+    BMP local = *image;
+    if (!inplace) {
+        local.pixel_buffer = malloc(image->fsize - 54);
+        if (!local.pixel_buffer) {
+            wprintf_s(L"Error in %s (%s, %d), malloc returned NULL\n", __FUNCTIONW__, __FILEW__, __LINE__);
+            return (BMP) {
+                .fsize = 0, .npixels = 0, .fhead = { 0, 0, 0, 0 },
+                        .infhead = { 0, 0, 0, 0, 0, RGB, 0, 0, 0, 0, 0 },
+                        .pixel_buffer = NULL
+            };
+        }
+        memcpy_s(local.pixel_buffer, local.fsize - 54, image->pixel_buffer, image->fsize - 54);
+    }
+
     switch (rmcolor) {
         case REMRED :
-            for (uint64_t i = 0; i < (size - 54); i += 4) pixels_start[i + 2] = 0;
+            for (size_t i = 0; i < local.npixels; ++i) local.pixel_buffer[i].RED = 0;
             break;
         case REMGREEN :
-            for (uint64_t i = 0; i < (size - 54); i += 4) pixels_start[i + 1] = 0;
+            for (size_t i = 0; i < local.npixels; ++i) local.pixel_buffer[i].GREEN = 0;
             break;
         case REMBLUE :
-            for (uint64_t i = 0; i < (size - 54); i += 4) pixels_start[i] = 0;
+            for (size_t i = 0; i < local.npixels; ++i) local.pixel_buffer[i].BLUE = 0;
             break;
         case REMRG :
-            for (uint64_t i = 0; i < (size - 54); i += 4) pixels_start[i + 1] = pixels_start[i + 2] = 0;
+            for (size_t i = 0; i < local.npixels; ++i) local.pixel_buffer[i].RED = local.pixel_buffer[i].GREEN = 0;
             break;
         case REMRB :
-            for (uint64_t i = 0; i < (size - 54); i += 4) pixels_start[i] = pixels_start[i + 2] = 0;
+            for (size_t i = 0; i < local.npixels; ++i) local.pixel_buffer[i].RED = local.pixel_buffer[i].BLUE = 0;
             break;
         case REMGB :
-            for (uint64_t i = 0; i < (size - 54); i += 4) pixels_start[i] = pixels_start[i + 1] = 0;
+            for (size_t i = 0; i < local.npixels; ++i) local.pixel_buffer[i].GREEN = local.pixel_buffer[i].BLUE = 0;
             break;
     }
+    return local;
+}
+
+static void __forceinline __stdcall close_bmp(_In_ const BMP image) {
+    free(image.pixel_buffer);
     return;
 }
 
@@ -412,18 +441,48 @@ int wmain(void) {
     //     exit(1);
     // }
 
-    BMP image = new_bmp(L"./sydney.bmp");
+    BMP image   = new_bmp(L"./sydney.bmp");
 
-    to_blacknwhite(&image, FLATBINARY, false);
+    BMP bw_ave  = to_blacknwhite(&image, AVERAGE, false);
+    BMP bw_wav  = to_blacknwhite(&image, WEIGHTED_AVERAGE, false);
+    BMP bw_lum  = to_blacknwhite(&image, LUMINOSITY, false);
+    BMP bw_bin  = to_blacknwhite(&image, BINARY, false);
+    BMP bw_fbin = to_blacknwhite(&image, FLATBINARY, false);
 
-    // wchar_t wrfname[200] = { 0 };
-    // wcscpy_s(wrfname, 200, argv[1]);
-    // uint64_t offset_null = wcsnlen_s(wrfname, 200);
-    // memset(wrfname + offset_null - 4, 0U, 3); // remove the .bmp extension from the filename.
-    // wcscat_s(wrfname, 200, L"-BW.bmp");
+    BMP nored   = remove_color(&image, REMRED, false);
+    BMP nogreen = remove_color(&image, REMGREEN, false);
+    BMP noblue  = remove_color(&image, REMBLUE, false);
+    BMP norg    = remove_color(&image, REMRG, false);
+    BMP norb    = remove_color(&image, REMRB, false);
+    BMP nogb    = remove_color(&image, REMGB, false);
 
-    serialize_bmp(&image, L"./sydney-bw.bmp");
+    serialize_bmp(&bw_ave, L"./sydney_bw_ave.bmp");
+    serialize_bmp(&bw_wav, L"./sydney_bw_wav.bmp");
+    serialize_bmp(&bw_lum, L"./sydney_bw_lum.bmp");
+    serialize_bmp(&bw_bin, L"./sydney_bw_bin.bmp");
+    serialize_bmp(&bw_fbin, L"./sydney_bw_fbin.bmp");
 
-    free(image.pixel_buffer);
+    serialize_bmp(&nored, L"./sydney_GB.bmp");
+    serialize_bmp(&noblue, L"./sydney_RG.bmp");
+    serialize_bmp(&nogreen, L"./sydney_RB.bmp");
+    serialize_bmp(&nogb, L"./sydney_R.bmp");
+    serialize_bmp(&norb, L"./sydney_G.bmp");
+    serialize_bmp(&norg, L"./sydney_B.bmp");
+
+    close_bmp(image);
+
+    close_bmp(bw_ave);
+    close_bmp(bw_wav);
+    close_bmp(bw_lum);
+    close_bmp(bw_bin);
+    close_bmp(bw_fbin);
+
+    close_bmp(nored);
+    close_bmp(noblue);
+    close_bmp(nogreen);
+    close_bmp(nogb);
+    close_bmp(norb);
+    close_bmp(norg);
+
     return EXIT_SUCCESS;
 }

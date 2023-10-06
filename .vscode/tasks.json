@@ -7,7 +7,8 @@
             "args": [
                 "/arch:AVX512",
                 "/diagnostics:caret",
-                "/D:_DEBUG",
+                "/DDEBUG",
+                "/D_DEBUG", // Okay for C, but do not define this for C++
                 "/F0x10485100",
                 "/favor:INTEL64",
                 "/fp:strict",
@@ -25,7 +26,7 @@
                 "/std:c17",
                 "/Fe${fileDirname}\\${fileBasenameNoExtension}-vscodedbg.exe",
                 "${file}",
-                "/Link /DEBUG:full"
+                "/link /DEBUG:full"
             ],
             "options": {
                 "cwd": "${fileDirname}"

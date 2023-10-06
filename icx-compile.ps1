@@ -62,7 +62,7 @@ $cflags = @(
     "/Qvec-with-mask",
     "/Qvec-remainder-loops",
     "/Qxx86-64-v4", # Generates code for Intel® Advanced Vector Extensions 512
-    "/TP",
+    "/TC",
     "/tune:core-avx2",
     "/Wabi",
     "/Wall",
@@ -93,6 +93,4 @@ $cflags = @(
 )
 
 Write-Host "icx.exe ${cfiles} ${cflags}" -ForegroundColor Cyan
-icx.exe $cfiles $cflags    
-Clear-Host
-
+icx.exe $cfiles $cflags
