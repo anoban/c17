@@ -1,16 +1,70 @@
-#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+    #define _AMD64_
+    #define WIN32_LEAN_AND_MEAN
+    #define WIN32_EXTRA_MEAN
+#endif
+
+#include <errhandlingapi.h>
+#include <fileapi.h>
+#include <handleapi.h>
+
+#define MAX_TOTAL_NODES 511LLU
+#define MAX_LEAF_NODES  256LLU
+#define MAX_LINK_NODES  255LLU
+
 // Self referential structs need a forward declaration since when the self reference is analyzed by the compiler, it won't be able to
 // figure out its type, since the type is used inside its declaration.
+
+static inline uint8_t* open(_In_ const wchar_t* restrict file_name, _Out_ uint64_t* const nread_bytes) {
+    *nread_bytes    = 0;
+    void *   handle = NULL, *buffer = NULL;
+    uint32_t nbytes = 0;
+
+    handle          = CreateFileW(file_name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, NULL);
+
+    if (handle != INVALID_HANDLE_VALUE) {
+        LARGE_INTEGER file_size;
+        if (!GetFileSizeEx(handle, &file_size)) {
+            fwprintf_s(stderr, L"Error %lu in GetFileSizeEx\n", GetLastError());
+            return NULL;
+        }
+
+        // add an extra megabyte to the buffer, for safety.
+        size_t buffsize = file_size.QuadPart + (1024U * 1024);
+
+        // caller is responsible for freeing this buffer.
+        buffer          = malloc(buffsize);
+        if (buffer) {
+            if (ReadFile(handle, buffer, buffsize, &nbytes, NULL)) {
+                *nread_bytes = nbytes;
+                return buffer;
+            } else {
+                fwprintf_s(stderr, L"Error %lu in ReadFile\n", GetLastError());
+                CloseHandle(handle);
+                free(buffer);
+                return NULL;
+            }
+        } else {
+            fputws(L"Memory allocation error: malloc returned NULL", stderr);
+            CloseHandle(handle);
+            return NULL;
+        }
+    } else {
+        fwprintf_s(stderr, L"Error %lu in CreateFileW\n", GetLastError());
+        return NULL;
+    }
+}
 
 // There are two ways to workaround this problem:
 // 1) typedef struct node_t node_t;
 // 2) Or one could annotate the self reference as a struct.
 
+#pragma pack(push, 8)
 typedef struct node_t {
         struct node_t* left;  // Zero
         struct node_t* right; // One
@@ -22,18 +76,28 @@ typedef struct node_t {
         uint64_t weight; // Frequency in the case of leaf nodes (nodes that directly represent bytes)
                          // Sum of the frequencies of child nodes, in the case of linking nodes.
 } node_t;
+#pragma pack(pop)
+
+#pragma pack(push, 8)
+typedef struct huffman_t {
+        node_t   nodes[MAX_TOTAL_NODES]; // `an array of 256 node_t s.`
+        uint64_t freqs[256];             // `an array holding the frequencies of each byte in the file.`
+        uint8_t  orderedbytes[256];      // `bytes sorted by ascending frequency.`
+        uint64_t nleaves;                // `number of leaf nodes in the tree.`
+        uint64_t nlinks;                 // `number of link nodes in the tree.`
+} huffman_t;
+#pragma pack(pop)
 
 // We won't be hooking up nodes without children to parents, so those variants need not to be here.
-typedef enum link_t {
-    NPSC = -3, // No Parent, Single Child.
-    NPTC,      // No Parent, Two Children.
-    PTC,       // Parent, Two Children.
-} link_t;
+typedef enum LINK {
+    NPSC = -3, // `No Parent, Single Child`
+    NPTC,      // `No Parent, Two Children`
+    PTC,       // `Parent, Two Children`
+} LINK;
 
-// Oriented to sort in ascending order.
 // context must be the predicate's first argument, function signature must be in the following form:
-// compare(context, (void*) &elem1, (void*) &elem2);
-// If ascending sort is desired, just swap the return values -1 and 1.
+// `compare(context, (void*) &elem1, (void*) &elem2)`;
+// designed to sort in descending order, if ascending sort is desired, just swap the return values -1 and 1.
 int32_t static inline __cdecl predicate(
     _In_reads_(1) void* restrict context, _In_reads_(1) const void* restrict this, _In_reads_(1) const void* restrict next
 ) {
@@ -47,13 +111,12 @@ int32_t static inline __cdecl predicate(
         return -1; // frequencies[__this] < frequencies[__next]
 }
 
-// The argument `frequencies` must be of length 256. The function assumes this by default and does no bound checks.
 void static inline __stdcall initialize_frequency_table(
-    _In_reads_bytes_(size) const uint8_t* restrict byte_stream,
-    const _In_ uint64_t size,
-    _In_reads_bytes_(2048) uint64_t* const restrict frequencies
+    _Inout_ huffman_t* const restrict tree, _In_ const uint8_t* const restrict bytestream, _In_ const uint64_t length
 ) {
-    for (uint64_t i = 0; i < size; ++i) frequencies[byte_stream[i]]++;
+    // byte = bytestream[i]
+    // freqs[byte]++
+    for (uint64_t i = 0; i < length; ++i) tree->freqs[bytestream[i]]++;
     return;
 }
 
@@ -63,10 +126,6 @@ void static inline __stdcall initialize_frequency_table(
 // Total number of nodes (maximum possible) is 2N - 1 i.e = (256 * 2) - 1 = 511
 // Since we are willing to use 256 terminal nodes (again, we will never ever need nodes more than this. Sort of an overkill, but okay.)
 // The number of linker nodes will be 2N - 1 - N = (N - 1) i.e 255
-
-#define MAX_TOTAL_NODES 511LLU
-#define MAX_LEAF_NODES  256LLU
-#define MAX_LINK_NODES  255LLU
 
 // Sort the bytes array, using the frequencies of bytes in the byte stream as reference, and returns the offset of the first byte with
 // non-zero frequency. Uses UCRT's qsort internally. Caller does not need to initialize the `bytes` array.
@@ -89,10 +148,12 @@ uint64_t static inline __stdcall sort_bytes(
 }
 
 int wmain(void) {
-    const char text[]           = "BIG BOB BITES A BAG OF BANANAS"; // the length shown in hover includes the null terminator.
+    uint64_t       nbytes   = 0;
+    const uint8_t* contents = open(L"moby_dick.txt", &nbytes);
 
-    uint64_t   frequencies[256] = { 0 };
-    initialize_frequency_table(text, strlen(text), frequencies);
+    huffman_t      hftree;
+
+    initialize_frequency_table(&hftree, contents, nbytes);
 
     // The bytes with higher frequencies need the lowest number of bits for encoding in order to make the space use minimal.
     // Bytes that occur rarely like the non-printing characters in a text file, can be represented by comparatively larger number of bits,
@@ -113,7 +174,11 @@ int wmain(void) {
     );
 
     node_t huffman_tree[MAX_TOTAL_NODES]; // This will be our Huffman tree, Just a plain array of node_t s on the stack.
-    memset(huffman_tree, 0U, MAX_TOTAL_NODES * sizeof(node_t));
+    for (size_t i = 0; i < MAX_TOTAL_NODES; ++i) {
+        huffman_tree[i].left = huffman_tree[i].right = NULL;
+        huffman_tree[i].weight                       = -1000;
+        huffman_tree[i].byte                         = 0;
+    }
 
     // 256 - firstnzbytepos will give the number of needed leaf nodes.
     const uint64_t n_leafnodes = 256 - firstnzbytepos; // Equal to the number of bytes with non-zero frequencies.
