@@ -85,13 +85,14 @@ static inline uint8_t* open_image(_In_ const wchar_t* restrict file_name, _Out_ 
 
 const uint16_t static SOBMP = ((uint16_t) 'M' << 8) | (uint16_t) 'B';
 
-#pragma pack(1)
+#pragma pack(push, 1)
 typedef struct {
         uint16_t SOI;      // BM
         uint32_t FSIZE;
         uint32_t RESERVED; // this is actually two consecutive 16 bit elements, but who cares :)
         uint32_t PIXELDATASTART;
 } __BITMAPFILEHEADER;
+#pragma pack(pop)
 
 // image header comes in two variants!
 // one representing OS/2 BMP format (BITMAPCOREHEADER) and another representing the most common Windows BMP format.
@@ -103,13 +104,15 @@ typedef struct {
 // from Windows 95 onwards, Windows supports an extended version of BITMAPINFOHEADER, which could be larger than 40 bytes!
 
 // types of compressions used in BMP files.
-typedef enum { RGB, RLE8, RLE4, BITFIELDS } BMPCOMPRESSIONKIND;
+#pragma pack(push, 4)
+typedef enum { RGB, RLE8, RLE4, BITFIELDS } BMPCOMPRESSIONKIND; // uint32_t
+#pragma pack(pop)
 
-#pragma pack(1)
+#pragma pack(push, 2)
 typedef struct {
-        uint32_t           HEADERSIZE; // >= 40 bytes.
+        uint32_t           HEADERSIZE;                          // >= 40 bytes.
         uint32_t           WIDTH;
-        int32_t            HEIGHT;     // usually an unsigned value, a negative value alludes that the pixel data is ordered top down,
+        int32_t            HEIGHT; // usually an unsigned value, a negative value alludes that the pixel data is ordered top down,
         // instead of the customary bottom up order. bmp images with a - height values may not be compressed!
         uint16_t           NPLANES;       // must be 1
         uint16_t           NBITSPERPIXEL; // 1, 4, 8, 16, 24 or 32
@@ -120,6 +123,7 @@ typedef struct {
         uint32_t           NCMAPENTRIES;  // number of entries in the colourmap that are used.
         uint32_t           NIMPCOLORS;    // number of important colors.
 } __BITMAPINFOHEADER;
+#pragma pack(pop)
 
 // a BMP with BITMAPCOREHEADER cannot be compressed.
 typedef struct {
@@ -134,13 +138,14 @@ typedef struct {
 // there are 3 variants of the colour palette structure.
 // first two variants are used to map pixel data to RGB values, when the bit count is 1, 4 or 8.
 // these two variants are common in Windows BMP files.
-#pragma pack(1)
+#pragma pack(push, 1)
 typedef struct {
         uint8_t BLUE;
         uint8_t GREEN;
         uint8_t RED;
         uint8_t RESERVED; // must be 0, but seems to be 0xFF in most BMPs, yikes!
 } ___RGBQUAD;
+#pragma pack(pop)
 
 // BMP files in OS/2 use the third variant
 typedef struct {
@@ -150,7 +155,6 @@ typedef struct {
 } ___RGBTRIPLE;
 
 // A struct representing a BMP image.
-#pragma pack(1)
 typedef struct {
         uint64_t           fsize;
         uint64_t           npixels;
@@ -172,6 +176,7 @@ static __forceinline BMPCOMPRESSIONKIND __stdcall get_bmp_compression_kind(_In_ 
 static inline __BITMAPFILEHEADER parse_bitmapfile_header(_In_ const uint8_t* restrict imstream, _In_ const uint64_t fsize) {
     static_assert(sizeof(__BITMAPFILEHEADER) == 14LLU, "Error: __BITMAPFILEHEADER is not 14 bytes in size.");
     assert(fsize >= sizeof(__BITMAPFILEHEADER));
+
     __BITMAPFILEHEADER header = { 0, 0, 0, 0 };
     // due to little endianness, two serial bytes 0x42, 0x4D will be interpreted as 0x4D42 when casted as
     // an uint16_t yikes!, thereby warranting a little bitshift.
@@ -188,6 +193,7 @@ static inline __BITMAPFILEHEADER parse_bitmapfile_header(_In_ const uint8_t* res
 static inline __BITMAPINFOHEADER parse_bitmapinfo_header(_In_ const uint8_t* const restrict imstream, _In_ const uint64_t fsize) {
     static_assert(sizeof(__BITMAPINFOHEADER) == 40LLU, "Error: __BITMAPINFOHEADER is not 40 bytes in size");
     assert(fsize >= (sizeof(__BITMAPFILEHEADER) + sizeof(__BITMAPINFOHEADER)));
+
     __BITMAPINFOHEADER header = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     if (*((uint32_t*) (imstream + 14U)) > 40) {
         fputws(L"BITMAPINFOHEADER larger than 40 bytes! BMP image seems to contain an unparsable file info header", stderr);
@@ -330,7 +336,7 @@ static inline void print_bmp_info(_In_ const BMP* const restrict image) {
 // AVERAGE takes the mean of R, G and B values.
 // WEIGHTED_AVERAGE does GREY = (0.299 R) + (0.587 G) + (0.114 B)
 // LUMINOSITY does LUM = (0.2126 R) + (0.7152 G) + (0.0722 B)
-typedef enum { AVERAGE, WEIGHTED_AVERAGE, LUMINOSITY, BINARY, FLATBINARY } RGBTOBWKIND;
+typedef enum { AVERAGE, WEIGHTED_AVERAGE, LUMINOSITY, BINARY } RGBTOBWKIND;
 
 // If inplace = true, return value can be safely ignored.
 static inline BMP to_blacknwhite(_In_ const BMP* image, _In_ const RGBTOBWKIND conversion_kind, _In_ const bool inplace) {
@@ -370,14 +376,14 @@ static inline BMP to_blacknwhite(_In_ const BMP* image, _In_ const RGBTOBWKIND c
                                (local.pixel_buffer[i].RED * 0.0722L));
             }
             break;
+        // case BINARY :
+        //     for (size_t i = 0; i < local.npixels; ++i) {
+        //         local.pixel_buffer[i].BLUE  = local.pixel_buffer[i].BLUE > 128 ? 255 : 0;
+        //         local.pixel_buffer[i].GREEN = local.pixel_buffer[i].GREEN > 128 ? 255 : 0;
+        //         local.pixel_buffer[i].RED   = local.pixel_buffer[i].RED > 128 ? 255 : 0;
+        //     }
+        //     break;
         case BINARY :
-            for (size_t i = 0; i < local.npixels; ++i) {
-                local.pixel_buffer[i].BLUE  = local.pixel_buffer[i].BLUE > 128 ? 255 : 0;
-                local.pixel_buffer[i].GREEN = local.pixel_buffer[i].GREEN > 128 ? 255 : 0;
-                local.pixel_buffer[i].RED   = local.pixel_buffer[i].RED > 128 ? 255 : 0;
-            }
-            break;
-        case FLATBINARY :
             uint64_t value = 0;
             for (size_t i = 0; i < local.npixels; ++i) {
                 value                      = (local.pixel_buffer[i].BLUE + local.pixel_buffer[i].GREEN + local.pixel_buffer[i].RED);
@@ -436,53 +442,49 @@ static void __forceinline __stdcall close_bmp(_In_ const BMP image) {
 }
 
 int wmain(_In_ int argc, _In_ wchar_t* argv[]) {
-    // if (argc < 2) {
-    //     fputs("Error: no files passed", stderr);
-    //     exit(1);
-    // }
+    if (argc < 2) {
+        fputs("Error: no files passed, bmp.exe takes/needs one argument: [file name]", stderr);
+        exit(1);
+    }
 
-    BMP image   = new_bmp(argv[1]);
+    BMP image  = new_bmp(argv[1]);
 
-    BMP bw_ave  = to_blacknwhite(&image, AVERAGE, false);
-    BMP bw_wav  = to_blacknwhite(&image, WEIGHTED_AVERAGE, false);
-    BMP bw_lum  = to_blacknwhite(&image, LUMINOSITY, false);
-    BMP bw_bin  = to_blacknwhite(&image, BINARY, false);
-    BMP bw_fbin = to_blacknwhite(&image, FLATBINARY, false);
-
-    // BMP nored   = remove_color(&image, REMRED, false);
-    // BMP nogreen = remove_color(&image, REMGREEN, false);
-    // BMP noblue  = remove_color(&image, REMBLUE, false);
-    // BMP norg    = remove_color(&image, REMRG, false);
-    // BMP norb    = remove_color(&image, REMRB, false);
-    // BMP nogb    = remove_color(&image, REMGB, false);
+    BMP bw_ave = to_blacknwhite(&image, AVERAGE, false);
+    BMP bw_wav = to_blacknwhite(&image, WEIGHTED_AVERAGE, false);
+    BMP bw_lum = to_blacknwhite(&image, LUMINOSITY, false);
+    BMP bw_bin = to_blacknwhite(&image, BINARY, false);
 
     serialize_bmp(&bw_ave, L"./sydney_bw_ave.bmp");
     serialize_bmp(&bw_wav, L"./sydney_bw_wav.bmp");
     serialize_bmp(&bw_lum, L"./sydney_bw_lum.bmp");
     serialize_bmp(&bw_bin, L"./sydney_bw_bin.bmp");
-    serialize_bmp(&bw_fbin, L"./sydney_bw_fbin.bmp");
-
-    // serialize_bmp(&nored, L"./sydney_GB.bmp");
-    // serialize_bmp(&noblue, L"./sydney_RG.bmp");
-    // serialize_bmp(&nogreen, L"./sydney_RB.bmp");
-    // serialize_bmp(&nogb, L"./sydney_R.bmp");
-    // serialize_bmp(&norb, L"./sydney_G.bmp");
-    // serialize_bmp(&norg, L"./sydney_B.bmp");
-
-    close_bmp(image);
 
     close_bmp(bw_ave);
     close_bmp(bw_wav);
     close_bmp(bw_lum);
     close_bmp(bw_bin);
-    close_bmp(bw_fbin);
 
-    // close_bmp(nored);
-    // close_bmp(noblue);
-    // close_bmp(nogreen);
-    // close_bmp(nogb);
-    // close_bmp(norb);
-    // close_bmp(norg);
+    BMP nored   = remove_color(&image, REMRED, false);
+    BMP nogreen = remove_color(&image, REMGREEN, false);
+    BMP noblue  = remove_color(&image, REMBLUE, false);
+    BMP norg    = remove_color(&image, REMRG, false);
+    BMP norb    = remove_color(&image, REMRB, false);
+    BMP nogb    = remove_color(&image, REMGB, false);
+
+    serialize_bmp(&nored, L"./sydney_GB.bmp");
+    serialize_bmp(&noblue, L"./sydney_RG.bmp");
+    serialize_bmp(&nogreen, L"./sydney_RB.bmp");
+    serialize_bmp(&nogb, L"./sydney_R.bmp");
+    serialize_bmp(&norb, L"./sydney_G.bmp");
+    serialize_bmp(&norg, L"./sydney_B.bmp");
+
+    close_bmp(image);
+    close_bmp(nored);
+    close_bmp(noblue);
+    close_bmp(nogreen);
+    close_bmp(nogb);
+    close_bmp(norb);
+    close_bmp(norg);
 
     return EXIT_SUCCESS;
 }
