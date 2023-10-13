@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.cu": "cuda-cpp",
+        "*.h": "c",
         "stdlib.h": "c",
         "vector": "cpp",
         "cctype": "cpp",

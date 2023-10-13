@@ -41,6 +41,7 @@ static inline uint8_t* open(_In_ const wchar_t* restrict file_name, _Out_ uint64
         buffer          = malloc(buffsize);
         if (buffer) {
             if (ReadFile(handle, buffer, buffsize, &nbytes, NULL)) {
+                CloseHandle(handle);
                 *nread_bytes = nbytes;
                 return buffer;
             } else {
