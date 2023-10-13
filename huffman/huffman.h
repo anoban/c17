@@ -35,6 +35,14 @@ static inline bool getbit(_In_ const uint8_t* restrict bitstream, _In_ const uin
     return byte & mask;
 }
 
-static void setbit(_In_ const uint8_t* restrict bitstream, _In_ const uint64_t bitpos, _In_ const bool flag) { }
+static void setbit(_In_ uint8_t* const restrict bitstream, _In_ const uint64_t bitpos, _In_ const bool flag) {
+    uint8_t bit = bitpos % 8, mask = 0x01;
+    for (size_t i = 0; i < bit; ++i) mask <<= 1;
+    if (flag)
+        bitstream[bitpos / 8] |= mask;
+    else
+        bitstream[bitpos / 8] &= (~mask);
+    return;
+}
 
-#endif
+#endif // __HUFFMAN__
