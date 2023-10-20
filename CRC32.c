@@ -76,6 +76,7 @@ int main(void) {
     uint32_t table[UCHAR_MAX + 1] = { 0 };
     init_crc_table(table);
 
-    for (uint64_t i = 0; i <= UCHAR_MAX; ++i) printf_s("%4llu) %s\n", i, table[i] == CRC_TABLE[i] ? "okay" : "whoops");
+    // for (uint64_t i = 0; i <= UCHAR_MAX; ++i) printf_s("%4llu) %s\n", i, table[i] == CRC_TABLE[i] ? "okay" : "whoops");
+    for (uint64_t i = 0; i <= UCHAR_MAX; ++i) wprintf_s(L"0x%08X,\n", table[i]);
     return 0;
 }
