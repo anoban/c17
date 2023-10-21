@@ -7,7 +7,7 @@
 #include <Windows.h>
 
 // caller needs to free the pointer returned, before using the buffer, check for NULL.
-static __forceinline void* open(const _In_ wchar_t* restrict file_name, _Inout_ uint32_t* restrict nbytes) {
+static inline void* open(const _In_ wchar_t* restrict file_name, _Inout_ uint32_t* restrict nbytes) {
     void* file_handle = CreateFileW(file_name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, NULL);
 
     if (file_handle == INVALID_HANDLE_VALUE) {
@@ -41,7 +41,7 @@ cleanup:
     return NULL;
 }
 
-uint64_t __forceinline __stdcall BE2LE_U64(const _In_ uint64_t be_value) {
+static inline uint64_t __stdcall BE2LE_U64(const _In_ uint64_t be_value) {
     // e.g. BE: 1111 0000 1010 1001 1010 1000 0101 0101 1111 1011 1101 1111 0001 1001 0111 0011
     //			----1---- ----2---- ----3---- ----4---- ----5---- ----6---- ----7---- ----8----
     uint64_t le_value  = (be_value << 56U);                           // make the last BE byte first.
@@ -56,7 +56,7 @@ uint64_t __forceinline __stdcall BE2LE_U64(const _In_ uint64_t be_value) {
 }
 
 // void* buffers will implicitly be converted to uint64_t*, and the size must be in bytes.
-void hex_dump(const _In_ uint64_t* buffer, const _In_ uint64_t buffsize) {
+static inline void hex_dump(const _In_ uint64_t* buffer, const _In_ uint64_t buffsize) {
     // Hex of a 64 bit integer will take 16 characters. A fullscreen terminal window is roughly 140 characters wide.
     // We can print 6 columns of 64 bit hex values, neatly.
 
@@ -86,6 +86,28 @@ void hex_dump(const _In_ uint64_t* buffer, const _In_ uint64_t buffsize) {
     }
     _putws(wstring_buffer);
     free(wstring_buffer);
+    return;
+}
+
+// when the programme is invoked with -Help
+static inline void help(void) {
+    _putws(
+        L"hexdump.exe -Help"
+        L"-File   FilePath [String]:              Full/relative path of the input file\n"
+        L"-First  N [Positive integer]:           First N lines will be printed\n"
+        L"-Last   N [Positive integer]:           Last N lines will be printed\n"
+        L"-Text   True[Default]/False [Boolean]:  Flag to show the ASCII representation of file buffer on right\n"
+        L"-Search [HX/AS]:String [String:String]: Search for a given pattern in the buffer\n"
+        L"                                        HX/AS specifies whether the argument is to be interpreted as a Hex value or a ASCII sequence of characters\n"
+        L"Example: hexdump.exe -File dump.bin -Search HX:FF1AD819 will look for these 4 contiguous bytes in the file buffer\n"
+        L"Example: hexdump.exe -File dump.bin -Search AS:IDAT will look for the ASCII character sequence \"IDAT\" in the file buffer\n"
+        L"-Search tokens MUST NOT be enclosed in quotes\n"
+        L"-Search does accept multiple tokens simultaneously. To combine a series of tokens use a list syntax: [,]\n"
+        L"Example: hexdump.exe -File dump.bin -Search HX:[AA12DA98,5674D30AB3C8]"
+        L"Example: hexdump.exe -File dump.bin -Search AS:[IDAT,IHDR]"
+        L"Example: hexdump.exe -File dump.bin -Search AS:[IDAT,gAMA] HX:[AA12DA98,74D3AEB3C8F7]"
+        L"Any errors in argument parsing will lead to premature programme termination\n"
+    );
     return;
 }
 
