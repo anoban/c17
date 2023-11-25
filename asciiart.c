@@ -139,35 +139,78 @@ static inline WinBMP NewBmpImage(
     return image;
 }
 
-// ASCII characters (well UNICODE, technically) in descending order of luminance
-static const wchar_t ascii[] = { L'N', L'@', L'#', L'W', L'$', L'9', L'8', L'7', L'6', L'5', L'4', L'3', L'2', L'1',
-                                 L'?', L'!', L'a', L'b', L'c', L';', L':', L'+', L'=', L'-', L',', L'.', L'_' };
+static inline void BmpInfo(_In_ const WinBMP* const restrict image) {
+    wprintf_s(
+        L"File size %Lf MiBs\nPixel data start offset: %d\n"
+        L"BITMAPINFOHEADER size: %u\nImage width: %u\nImage height: %u\nNumber of planes: %hu\n"
+        L"Number of bits per pixel: %hu\nImage size: %u\nResolution PPM(X): %u\nResolution PPM(Y): %u\nNumber of used colormap entries: % u\n"
+        L"Number of important colors: % u\n",
+        (long double) (image->fhead.bfSize) / (1024 * 1024LLU),
+        image->fhead.bfOffBits,
+        image->infhead.biSize,
+        image->infhead.biWidth,
+        image->infhead.biHeight,
+        image->infhead.biPlanes,
+        image->infhead.biBitCount,
+        image->infhead.biSizeImage,
+        image->infhead.biXPelsPerMeter,
+        image->infhead.biYPelsPerMeter,
+        image->infhead.biClrUsed,
+        image->infhead.biClrImportant
+    );
 
-static __forceinline wchar_t __stdcall ScaleRgbQuad(_In_ const RGBQUAD* const restrict pixel) {
+    switch (image->infhead.biCompression) {
+        case 0  : _putws(L"BITMAPINFOHEADER.CMPTYPE: RGB"); break;
+        case 1  : _putws(L"BITMAPINFOHEADER.CMPTYPE: RLE4"); break;
+        case 2  : _putws(L"BITMAPINFOHEADER.CMPTYPE: RLE8"); break;
+        case 3  : _putws(L"BITMAPINFOHEADER.CMPTYPE: BITFIELDS"); break;
+        default : _putws(L"BITMAPINFOHEADER.CMPTYPE: UNKNOWN"); break;
+    }
+
+    wprintf_s(
+        L"%s BMP file\n"
+        L"BMP pixel ordering: %s\n",
+        image->infhead.biSizeImage != 0 ? L"Compressed" : L"Uncompressed",
+        image->infhead.biHeight >= 0 ? L"BOTTOMUP" : L"TOPDOWN"
+    );
+
+    return;
+}
+
+// ASCII characters in descending order of luminance
+// static const char ascii[] = { 'N', '@', '#', 'W', '$', '9', '8', '7', '6', '5', '4', '3', '2', '1',
+//                               '?', '!', 'a', 'b', 'c', ';', ':', '+', '=', '-', ',', '.', '_' };
+
+static const char ascii[] = { '_', '.', ',', '-', '=', '+', ':', ';', 'c', 'b', 'a', '!', '?', '1',
+                              '2', '3', '4', '5', '6', '7', '8', '9', '$', 'W', '#', '@', 'N' };
+
+static __forceinline char __stdcall ScaleRgbQuad(_In_ const RGBQUAD* const restrict pixel) {
     return ascii[((((long) pixel->rgbBlue) + pixel->rgbGreen + pixel->rgbRed) / 3) % 27];
 }
 
-typedef struct _wascii_t {
-        const wchar_t* buffer;
-        const size_t   length; // count of wchar_t s in the buffer.
-} wascii_t;
+typedef struct _ascii_t {
+        const char*  buffer;
+        const size_t length; // count of wchar_t s in the buffer.
+} ascii_t;
 
-static inline wascii_t GenerateASCIIBuffer(_In_ const WinBMP* const restrict image) {
+static inline ascii_t GenerateASCIIBuffer(_In_ const WinBMP* const restrict image) {
     // TODO
     // we need to downscale the ascii art if the image is larger than the console window
     // a fullscreen cmd window is 215 chars wide and 50 chars high
-    wchar_t* txtbuff = malloc((image->infhead.biHeight * image->infhead.biWidth + image->infhead.biHeight) * sizeof(wchar_t));
+    char* txtbuff = malloc((image->infhead.biHeight * image->infhead.biWidth + image->infhead.biHeight) * sizeof(char));
     if (!txtbuff) {
         fwprintf_s(stderr, L"Error in %s @ line %d: malloc failed!\n", __FUNCTIONW__, __LINE__);
-        return (wascii_t) { NULL, 0 };
+        return (ascii_t) { NULL, 0 };
     }
-    size_t h = 0, w = 0;
 
+    size_t h = 0, w = 0;
     for (; h < image->infhead.biHeight; ++h) {
-        for (; w < image->infhead.biWidth; ++w) txtbuff[h * w] = ScaleRgbQuad(&image->pixel_buffer[h * w]);
-        txtbuff[h * w + 1] = L'\n';
+        w = 0;
+        for (; w < image->infhead.biWidth; ++w)
+            txtbuff[h * image->infhead.biWidth + w] = ScaleRgbQuad(&image->pixel_buffer[h * image->infhead.biWidth + w]);
+        // txtbuff[h * w + 1] = '\n';
     }
-    return (wascii_t) { txtbuff, (image->infhead.biHeight * image->infhead.biWidth + image->infhead.biHeight) };
+    return (ascii_t) { txtbuff, (image->infhead.biHeight * image->infhead.biWidth + image->infhead.biHeight) };
 }
 
 int wmain(_In_opt_ const int32_t argc, _In_opt_count_(argc) wchar_t* argv[]) {
@@ -177,13 +220,18 @@ int wmain(_In_opt_ const int32_t argc, _In_opt_count_(argc) wchar_t* argv[]) {
         const uint8_t* buffer = OpenImage(argv[i], &fsize);
 
         if (buffer) {
-            wprintf_s(L"File size is %.3Lf MiBs\n", (long double) fsize / (1024 * 1024));
             const WinBMP image = NewBmpImage(buffer, fsize);
 
             if (image.pixel_buffer) {
-                const wascii_t txt = GenerateASCIIBuffer(&image);
+                BmpInfo(&image);
+
+                const ascii_t txt = GenerateASCIIBuffer(&image);
                 if (txt.buffer) {
-                    for (size_t i = 0; i < txt.length; ++i) putwchar(txt.buffer[i]);
+                    for (size_t i = 0; i < txt.length; ++i) {
+                        // putwchar(txt.buffer[i]);
+                        // printf_s("%d: %c ", txt.buffer[i], txt.buffer[i]);
+                        putchar(txt.buffer[i]);
+                    }
                     free(txt.buffer);
                 }
                 free(image.pixel_buffer);
