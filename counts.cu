@@ -59,7 +59,7 @@ static inline char* open(_In_ const wchar_t* const file_name, _Out_ uint64_t* co
 }
 
 __global__ void GetCharCountKernel(_In_ const char* const buffer, _In_ const size_t* length, _Inout_ size_t* const freqs) {
-    const size_t thread_id = threadIdx.x;
+    const char thread_id = threadIdx.x;
     assert(thread_id < 256);
     size_t count = 0;
     for (size_t i = 0; i < *length; ++i) count += (buffer[i] == thread_id);
@@ -97,6 +97,6 @@ int main(void) {
     for (size_t i = 0; i < nbytes; ++i) frequencies[buffer[i]]++;
     free((void*) buffer);
 
-    for (size_t i = 0; i < 256; ++i) wprintf_s(L"Frequency of character %c is %10zu.\n", i, frequencies[i]);
+    for (size_t i = 0; i < 256; ++i) wprintf_s(L"Frequency of character %C is %10zu.\n", i, frequencies[i]);
     return EXIT_SUCCESS;
 }

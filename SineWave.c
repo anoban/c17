@@ -3,21 +3,22 @@
                  (c) Charles Petzold, 1998
   -----------------------------------------*/
 
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include <windows.h>
 #pragma comment(lib, "Gdi32.lib")
 #pragma comment(lib, "User32.lib")
 
 #define NUM   10000
-#define TWOPI (2 * 3.14159)
+#define TWOPI (2.0L * M_PI)
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI       WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
-    static TCHAR szAppName[] = TEXT("SineWave");
+    static WCHAR szAppName[] = L"SineWave";
     HWND         hwnd;
     MSG          msg;
-    WNDCLASS     wndclass;
+    WNDCLASSEXW  wndclass;
 
     wndclass.style         = CS_HREDRAW | CS_VREDRAW;
     wndclass.lpfnWndProc   = WndProc;
@@ -30,14 +31,15 @@ int WINAPI       WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     wndclass.lpszMenuName  = NULL;
     wndclass.lpszClassName = szAppName;
 
-    if (!RegisterClass(&wndclass)) {
-        MessageBox(NULL, TEXT("Program requires Windows NT!"), szAppName, MB_ICONERROR);
+    if (!RegisterClassExW(&wndclass)) {
+        MessageBoxW(NULL, L"Program requires Windows NT!", szAppName, MB_ICONERROR);
         return 0;
     }
 
-    hwnd = CreateWindow(
+    hwnd = CreateWindowExW(
+        0,
         szAppName,
-        TEXT("Sine Wave Using Polyline"),
+        L"Sine Wave Using Polyline",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -52,11 +54,12 @@ int WINAPI       WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCm
     ShowWindow(hwnd, iCmdShow);
     UpdateWindow(hwnd);
 
-    while (GetMessage(&msg, NULL, 0, 0)) {
+    while (GetMessageW(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        DispatchMessageW(&msg);
     }
-    return msg.wParam;
+
+    return EXIT_SUCCESS;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
