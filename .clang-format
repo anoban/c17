@@ -776,7 +776,7 @@ QualifierAlignment: Leave                # Different ways to arrange specifiers 
 
 ReferenceAlignment: Left                 # Reference alignment style (overrides PointerAlignment for references).
 
-ReflowComments:  true                    # If true, clang-format will attempt to re-flow comments.
+ReflowComments:  false                    # If true, clang-format will attempt to re-flow comments.
 # If set to false;
 # // veryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongComment with plenty of information
 # /* second veryVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongComment with plenty of information */
