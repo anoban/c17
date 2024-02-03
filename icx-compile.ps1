@@ -16,7 +16,7 @@ if ($unrecognized.Count -ne 0) {
     Exit 1
 }
 
-$binary_name = $cfiles[0].Replace(".c", "-icx.exe")
+$binary_name = $cfiles[0].Replace(".c", ".exe")
 
 $cflags = @( 
     "/debug:none",
