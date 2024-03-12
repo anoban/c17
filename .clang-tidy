@@ -1,0 +1,32 @@
+# clang-tidy is a C/C++ static analyzer that is helpful in detecting potential errors or malpractices in C/C++ codebases.
+# clang-tidy bundles its own checks and also capable of using Clang Static Analyzer checks.
+# Each check offered by clang-tidy or Clang Static Analyzer has a name and can be chosen for use using the `-checks=` option.
+# -checks= option specifies a list of comma separated globs.
+# these globs are either prefixed with a negative sign or not
+# prefixing globs with negative sign removes them from clang-tidy's consideration while no prefix adds them to the checks performed by clang-tidy.
+# -checks also accepts wildcard specifiers which help to chose subsets of like named checks or to enable or disable checks alltogether.
+
+# e.g. -checks=-* will disable all the checks available in clang-tidy
+# while -checks=* will enable all available checks.
+# REMEBER WHAT MATTERS HERE IS THE PREFIX, HYPHENS THAT OCCUR IN THE MIDDLE OF CHECK TOKENS ARE USED WITH WILDCARD SPECIFIERS FOR PATTERN MATCHING.
+
+# e.g. -checks=-checks=-*,clang-analyzer-*,-clang-analyzer-cplusplus*
+# this will first disable all available (checks that were enabled by default) checks. then will enable all checks under the category
+# clang-analyzer-* (note the use of wildcard here) except for checks that were under the subcategory clang-analyzer-cplusplus* (again note the ocurrence of the wildcard here)
+
+# we'll use this file to cherry pick only the checks that we need as using aggregate specifiers brings in gratuitous baggage to the checks
+
+# effective (defaults in the absence of a custom .clang-tidy file in the current directory or parent directory) configurations can be viewed by
+# clang-tidy.exe --dump-config
+# for a comprehensive documentation, look up https://clang.llvm.org/extra/clang-tidy/index.html#using-clang-tidy
+
+# specifications that require a character strings are provided inside single quotation marks. e.g. 'hpp' instead of "hpp"
+
+Checks:          '-*'   # that disables everything
+WarningsAsErrors: ''
+HeaderFileExtensions: ['hpp'] # .h is for C headers.
+ImplementationFileExtensions: ['cpp']
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle:     ''
+User:            'Anoban'
