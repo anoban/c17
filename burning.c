@@ -1,4 +1,5 @@
 // clang-format off
+#define UNICODE
 #include <wchar.h>
 #include <windows.h>
 #include <commctrl.h>
@@ -16,24 +17,24 @@ HINSTANCE        g_hinst;
 LRESULT          g_pos = 150;
 
 int WINAPI       wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdLine, int nCmdShow) {
-    HWND      hwnd;
-    MSG       msg;
-    WNDCLASSW wc     = { 0 };
+    [[maybe_unused]] HWND hwnd; // needs clang and -std=c23
+    MSG                   msg;
+    WNDCLASSW             wc = { 0 };
 
-    wc.lpszClassName = L"Application";
-    wc.hInstance     = hInstance;
-    wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
-    wc.lpfnWndProc   = WndProc;
-    wc.hCursor       = LoadCursor(0, IDC_ARROW);
+    wc.lpszClassName         = L"Application";
+    wc.hInstance             = hInstance;
+    wc.hbrBackground         = GetSysColorBrush(COLOR_3DFACE);
+    wc.lpfnWndProc           = WndProc;
+    wc.hCursor               = LoadCursorW(0, IDC_ARROW);
 
-    g_hinst          = hInstance;
+    g_hinst                  = hInstance;
 
     RegisterClassW(&wc);
     hwnd = CreateWindowW(
         wc.lpszClassName, L"Burning control", WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN, 100, 100, 400, 250, 0, 0, hInstance, 0
     );
 
-    while (GetMessage(&msg, NULL, 0, 0)) DispatchMessage(&msg);
+    while (GetMessageW(&msg, NULL, 0, 0)) DispatchMessageW(&msg);
 
     return (int) msg.wParam;
 }
@@ -78,17 +79,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 NULL
             );
 
-            SendMessage(hwndTrack, TBM_SETRANGE, TRUE, MAKELONG(0, 750));
-            SendMessage(hwndTrack, TBM_SETPAGESIZE, 0, 20);
-            SendMessage(hwndTrack, TBM_SETTICFREQ, 20, 0);
-            SendMessage(hwndTrack, TBM_SETPOS, TRUE, 150);
+            SendMessageW(hwndTrack, TBM_SETRANGE, TRUE, MAKELONG(0, 750));
+            SendMessageW(hwndTrack, TBM_SETPAGESIZE, 0, 20);
+            SendMessageW(hwndTrack, TBM_SETTICFREQ, 20, 0);
+            SendMessageW(hwndTrack, TBM_SETPOS, TRUE, 150);
             break;
 
         case WM_SIZE : SetWindowPos(hwndBurn, NULL, 0, HIWORD(lParam) - 30, LOWORD(lParam), 30, SWP_NOZORDER); break;
 
         case WM_HSCROLL :
 
-            g_pos = SendMessage(hwndTrack, TBM_GETPOS, 0, 0);
+            g_pos = SendMessageW(hwndTrack, TBM_GETPOS, 0, 0);
             InvalidateRect(hwndBurn, NULL, TRUE);
             break;
 

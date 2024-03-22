@@ -10,23 +10,216 @@
 # while -checks=* will enable all available checks.
 # REMEBER WHAT MATTERS HERE IS THE PREFIX, HYPHENS THAT OCCUR IN THE MIDDLE OF CHECK TOKENS ARE USED WITH WILDCARD SPECIFIERS FOR PATTERN MATCHING.
 
-# e.g. -checks=-checks=-*,clang-analyzer-*,-clang-analyzer-cplusplus*
+# e.g. -checks=-*,clang-analyzer-*,-clang-analyzer-cplusplus*
 # this will first disable all available (checks that were enabled by default) checks. then will enable all checks under the category
 # clang-analyzer-* (note the use of wildcard here) except for checks that were under the subcategory clang-analyzer-cplusplus* (again note the ocurrence of the wildcard here)
 
-# we'll use this file to cherry pick only the checks that we need as using aggregate specifiers brings in gratuitous baggage to the checks
+# come clang-tidy checks are draconian and overly pedantic. there are few ways to suppress such warnings/errors.
+# check specific workarounds are available to disable select instances of certain diagnostics!
+# bugprone-use-after-move can be silenced by re-initializing the variable after it has been moved out
+# bugprone-string-integer-assignment can be suppressed by explicitly casting the integer to char
+# readability-implicit-bool-conversion can also be suppressed by using explicit casts, etc.
 
-# effective (defaults in the absence of a custom .clang-tidy file in the current directory or parent directory) configurations can be viewed by
-# clang-tidy.exe --dump-config
-# for a comprehensive documentation, look up https://clang.llvm.org/extra/clang-tidy/index.html#using-clang-tidy
+# clang-tidy also offers some generic mechanisms to override the diagnostic configs
+# an inline trailing // NOLINT disables all diagnostics for the line.
+# the reason for choosing to suppress the warning can be registered like so
+# // NOLINT: <did that because of this>
 
-# specifications that require a character strings are provided inside single quotation marks. e.g. 'hpp' instead of "hpp"
+# // NOLINT offers customization options with the option to use wildcards for categorical exclusion.
+# // NOLINT(google-explicit-constructor, google-runtime-int)
+# will disable only the chosen two checks for the line
 
-Checks:          '-*'   # that disables everything
-WarningsAsErrors: ''
-HeaderFileExtensions: ['hpp'] # .h is for C headers.
-ImplementationFileExtensions: ['cpp']
-HeaderFilterRegex: ''
-AnalyzeTemporaryDtors: false
-FormatStyle:     ''
-User:            'Anoban'
+# // NOLINT(google*) will disable all checks from the module google.
+
+# // NOLINT(*-avoid-c-arrays) will disable all diagnostics (possibly from different modules) with a label that ends with `-avoid-c-arrays`
+# this is a cross module linter flag for that line.
+
+# // NOLINTNEXTLINE can be used in the same way as // NOLINT but its effects only apply to the following line.
+# specify // NOLINTNEXTLIN in a dedicated line i.e not as a trailing comment on an existing line
+
+# clang-tidy also has an option to ignore diagnostics for code regions, using the BEGIN and END postfixes
+# // NOLINTBEGIN starts a section where clang-tidy diagnostics are skipped
+# // NOLINTEND closes the preceding section.
+# // NOLINTBEGIN also accepts optional parameters inside a parenthesis, like // NOLINTBEGIN(google-*)
+
+# note that whitespaces between NOLINT/NOLINTNEXTLINE/NOLINTBEGIN/NOLINTEND and the opening parenthesis are not allowed
+# (in this case the comment will be treated just as NOLINT/NOLINTNEXTLINE/NOLINTBEGIN/NOLINTEND), whereas in the check names list
+# (inside the parentheses), whitespaces can be used and will be ignored.
+
+# all NOLINTBEGIN comments must be paired by an equal number of NOLINTEND comments. Moreover, a pair of comments must have matching arguments
+# for example, NOLINTBEGIN(check-name) can be paired with NOLINTEND(check-name) but not with NOLINTEND (zero arguments).
+# clang-tidy will generate a clang-tidy-nolint error diagnostic if any NOLINTBEGIN/NOLINTEND comment violates these requirements.
+
+########################################################
+########################################################
+#                    IMPORTANT!                        #
+########################################################
+# AVOID TRAILING INLINE COMMENTS IN .clang-tidy FILES! #
+########################################################
+########################################################
+
+# JSON is a subset of YAML, so we could practically use JSON syntax in .clang-format, .clang-tidy and .clangd files!
+
+Checks: >
+  -*,
+  bugprone-argument-comment,
+  bugprone-assert-side-effect,
+  bugprone-assignment-in-if-condition,
+  bugprone-bool-pointer-implicit-conversion,
+  bugprone-branch-clone,
+  bugprone-casting-through-void,
+  bugprone-chained-comparison,
+  bugprone-compare-pointer-to-member-virtual-function,
+  bugprone-copy-constructor-init
+
+
+# -* disables all default checks. doing this as I want to handpick the checks I want without any interference from clang-tidy's defaults.
+
+ExtraArgs: ['-Wall', '-Wextra', '--std=c++20', '-c', '-O0', '--pedantic', '-DDEBUG', '-D_DEBUG']
+# extra arguments to pass to the compiler, these have decisive impact on the diagnostics issued as clang-tidy uses the AST generated by the
+# clang frontend for static analyses, not the raw source file. and these flags can significantly alter the structure of the AST
+
+FormatStyle: file
+# format the source file using the specs in the .clang-format file.
+
+HeaderFileExtensions:         ['', 'h', 'hpp', 'cuh']
+# the empty strings is for cpp standard headers e.g. iomanip
+
+HeaderFilterRegex:   ''
+# ignore diagnostics from c++ STL headers.
+
+ImplementationFileExtensions: ['c', 'cpp', 'cu']
+
+WarningsAsErrors: '*'
+# treat all clang-tidy warnings as errors, similar to -Werr, but for linting
+
+User: anoban
+# Specifies the name or e-mail of the user running clang-tidy. This option is used, for example, to place the correct user name
+# in TODO() comments in the relevant check.
+
+UseColor: true
+
+# for the configs in bugprone-argument-comment, clang-tidy uses an arbitraty heuristic to determine how close the comment is to the
+# parameter name. it'll issue a diagnostic if the comment in `ago` where the parameter name was `age` but won't when the comment is `address`
+
+# list of required checks
+CheckOptions:
+  - key: bugprone-argument-comment.StrictMode
+    value: true
+  - key: bugprone-argument-comment.IgnoreSingleArgument
+    value: false
+  - key: bugprone-argument-comment.CommentBoolLiterals
+    value: false
+  - key: bugprone-argument-comment.CommentIntegerLiterals
+    value: false
+  - key: bugprone-argument-comment.CommentFloatLiterals
+    value: false
+  - key: bugprone-argument-comment.CommentStringLiterals
+    value: false
+  - key: bugprone-argument-comment.CommentCharacterLiterals
+    value: false
+  - key: bugprone-argument-comment.CommentUserDefinedLiterals
+    value: false
+  - key: bugprone-argument-comment.CommentNullPtrs
+    value: false
+
+  - key: bugprone-assert-side-effect.AssertMacros
+    value: 'assert,static_assert'
+  - key: bugprone-assert-side-effect.CheckFunctionCalls
+    value: false
+  - key: bugprone-assert-side-effect.IgnoredFunctions
+    value: ''
+
+#################
+# Check details #
+#################
+
+# 1) bugprone-argument-comment
+# checks whether the argument comment used in a function invocation is pertinet to the argument name
+# e.g. if the syntax of a function is double powerl(const double value, const double exponent)
+# this will check the presence of pertinent argument comments
+# i.e it expects something like this :=> const double x = powerl(/*value=*/12.9759475, /*exponent=*/4.6424);
+# and will issue a diagnostic when there is a possible mistake, identifiable to its heuristics
+# const double x = powerl(/*velua=*/12.9759475, /*expinant=*/4.6424); will lead to the detection of spelling errors
+# however when the heuristics decide that the comment preceding an argument isn't intented as an argument comment, no diagnostics will be issued.
+# const double x = powerl(/*pi=*/12.9759475, /*square=*/2.000); probably won't raise any alarms.
+
+# 2) bugprone-assert-side-effect
+# finds and issues diagnoses where assert()s could cause ininted behaviour
+# has three following options
+# AssertMacros - A comma-separated list of the names of assert macros to be checked.
+# CheckFunctionCalls - Whether to treat non-const member and non-member functions as they produce side effects.
+# Disabled by default because it can increase the number of false positive warnings.
+# IgnoredFunctions - A semicolon-separated list of the names of functions or methods to be considered as not having side-effects.
+# Regular expressions are accepted, e.g. [Rr]ef(erence)?$ matches every type with suffix Ref, ref, Reference and reference.
+# The default is empty. If a name in the list contains the sequence :: it is matched against the qualified typename
+# (i.e. namespace::Type, otherwise it is matched against only the type name (i.e. Type).
+
+# 3) bugprone-assignment-in-if-condition
+# warns when assignments are made inside if() conditionals
+# e.g. size_t counts;
+# if(counts = getCounts()) // will lead to a diagnost
+# This is identified by both -Wparentheses and this check - should it have been: if (f == 4) ?
+# this check will report assignments inside if() clauses even if there's an extra pair of parentheses around
+# e.g. if((counts = getCounts()))
+
+# 4) bugprone-bool-pointer-implicit-conversion
+# checks whether a pointer to bool gets treated as a bool
+# const bool* boolptr = nullptr;
+# if(boolptr){ } // this will be flagged
+# THIS CHECK DOESN'T APPLY TO OTHER TYPE OF POINTERS!
+# const uintptr_t* const ptr = &var;
+# if(ptr) // is okay
+
+# 5) bugprone-branch-clone
+# detects the presence of identical statement blocks inside if else blocks and switch case blocks.
+# also receptive to ternary comparisons
+
+# 6) bugprone-casting-through-void
+# warns about casts that are brokered through an intermediate cast to a void*
+# e.g.
+# using IntegerPointer = int *;
+# double *ptr;
+# static_cast<IntegerPointer>(static_cast<void *>(ptr)); // WRONG
+# reinterpret_cast<IntegerPointer>(reinterpret_cast<void *>(ptr)); // WRONG
+# (IntegerPointer)(void *)ptr; // WRONG
+# IntegerPointer(static_cast<void *>(ptr)); // WRONG
+
+# 7) bugprone-chained-comparison
+# warns about chained comparisons that are likely to yield unwanted results
+# e.g.
+# int a = 2, b = 6, c = 4;
+# if (a < b < c) {  // what the programmer meant could be if((a < b) && (b < c))
+#     // This block will be executed
+# }
+# bool a = false, b = false, c = true;
+# if (a == b == c) {  // if((a == b) && (b == c)) :(
+#     // This block will be executed
+# }
+
+# 8) bugprone-compare-pointer-to-member-virtual-function
+# detects equality comparisons between member virtual function pointers to anything other than nullptr
+# struct A {
+#   void f1();
+#   void f2();
+#   virtual void f3();
+#   virtual void f4();
+#   void g1(int);
+# };
+# void fn() {
+#   bool r1 = (&A::f1 == &A::f2);  // ok
+#   bool r2 = (&A::f1 == &A::f3);  // bugprone
+#   bool r3 = (&A::f1 != &A::f3);  // bugprone
+#   bool r4 = (&A::f3 == nullptr); // ok
+#   bool r5 = (&A::f3 == &A::f4);  // bugprone
+#
+#   void (A::*v1)() = &A::f3;
+#   bool r6 = (v1 == &A::f1); // bugprone
+#   bool r6 = (v1 == nullptr); // ok
+#
+#   void (A::*v2)() = &A::f2;
+#   bool r7 = (v2 == &A::f1); // false positive, but potential risk if assigning other value to v2.
+#
+#   void (A::*v3)(int) = &A::g1;
+#   bool r8 = (v3 == &A::g1); // ok, no virtual function match void(A::*)(int) signature.
+# }
