@@ -18,7 +18,7 @@ static inline void __stdcall setbit(
     _Inout_ uint8_t* const restrict bitstream, _In_ const size_t offset, _In_ const bool flag /* on or off */
 ) {
     const size_t offbit = offset % 8;
-    uint8_t      mask   = 0x01;                                                               // 0000 0001
+    uint8_t      mask   = 0x01; // 0000 0001
     for (size_t i = offbit; i > 0; --i) mask <<= 1;
     if (flag)
         bitstream[offset / 8] |= mask;

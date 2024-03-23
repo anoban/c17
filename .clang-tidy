@@ -69,8 +69,9 @@ Checks: >
   bugprone-branch-clone,
   bugprone-casting-through-void,
   bugprone-chained-comparison,
-  bugprone-compare-pointer-to-member-virtual-function,
-  bugprone-copy-constructor-init
+  bugprone-dynamic-static-initializers,
+  bugprone-easily-swappable-parameters,
+  bugprone-implicit-widening-of-multiplication-result
 
 
 # -* disables all default checks. doing this as I want to handpick the checks I want without any interference from clang-tidy's defaults.
@@ -130,6 +131,18 @@ CheckOptions:
   - key: bugprone-assert-side-effect.IgnoredFunctions
     value: ''
 
+  - key: bugprone-easily-swappable-parameters.QualifiersMix
+    value: true
+  - key: bugprone-easily-swappable-parameters.ModelImplicitConversions
+    value: true
+  - key: bugprone-easily-swappable-parameters.NamePrefixSuffixSilenceDissimilarityTreshold
+    value: 2
+
+  - key: bugprone-implicit-widening-of-multiplication-result.UseCXXStaticCastsInCppSources
+    value: false
+  - key: bugprone-implicit-widening-of-multiplication-result.UseCXXHeadersInCppSources
+    value: true
+
 #################
 # Check details #
 #################
@@ -170,6 +183,7 @@ CheckOptions:
 # THIS CHECK DOESN'T APPLY TO OTHER TYPE OF POINTERS!
 # const uintptr_t* const ptr = &var;
 # if(ptr) // is okay
+# doesn't seem to work for C TUs.
 
 # 5) bugprone-branch-clone
 # detects the presence of identical statement blocks inside if else blocks and switch case blocks.
@@ -197,29 +211,22 @@ CheckOptions:
 #     // This block will be executed
 # }
 
-# 8) bugprone-compare-pointer-to-member-virtual-function
-# detects equality comparisons between member virtual function pointers to anything other than nullptr
-# struct A {
-#   void f1();
-#   void f2();
-#   virtual void f3();
-#   virtual void f4();
-#   void g1(int);
-# };
-# void fn() {
-#   bool r1 = (&A::f1 == &A::f2);  // ok
-#   bool r2 = (&A::f1 == &A::f3);  // bugprone
-#   bool r3 = (&A::f1 != &A::f3);  // bugprone
-#   bool r4 = (&A::f3 == nullptr); // ok
-#   bool r5 = (&A::f3 == &A::f4);  // bugprone
-#
-#   void (A::*v1)() = &A::f3;
-#   bool r6 = (v1 == &A::f1); // bugprone
-#   bool r6 = (v1 == nullptr); // ok
-#
-#   void (A::*v2)() = &A::f2;
-#   bool r7 = (v2 == &A::f1); // false positive, but potential risk if assigning other value to v2.
-#
-#   void (A::*v3)(int) = &A::g1;
-#   bool r8 = (v3 == &A::g1); // ok, no virtual function match void(A::*)(int) signature.
+# 8) bugprone-dynamic-static-initializers
+# Finds instances of static variables that are dynamically initialized in header files.
+# int foo() {
+#   static int k = bar();
+#   return k;
 # }
+# When synchronization of static initialization is disabled, if two threads both call foo for the first time, there is the possibility that
+# k will be double initialized, creating a race condition.
+
+# 9) bugprone-easily-swappable-parameters
+# Finds function definitions where parameters of convertible types follow each other directly, making call sites prone to calling the function
+# with swapped (or badly ordered) arguments.
+# void drawPoint(int X, int Y) { /* ... */ }
+# FILE *open(const char *Dir, const char *Name, Flags Mode) { /* ... */ }
+# in the above two functions it's easy to pass arguments in wrong positions since adjacent arguments have same types
+# More elaborate and type-safe constructs, such as opaque typedefs or strong types should be used instead, to prevent a mistaken order of arguments.
+# typedef struct { int X; int Y; } Coord2D;
+# void drawPoint(const Coord2D Pos) { /* ... */ }
+# FILE *open(const Path &Dir, const Filename &Name, Flags Mode) { /* ... */ }
