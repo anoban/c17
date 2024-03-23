@@ -17,21 +17,32 @@ HINSTANCE        g_hinst;
 LRESULT          g_pos = 150;
 
 int WINAPI       wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdLine, int nCmdShow) {
-    [[maybe_unused]] HWND hwnd; // needs clang and -std=c23
+    [[maybe_unused]] HWND hwnd;                                  // needs clang and -std=c23
     MSG                   msg;
     WNDCLASSW             wc = { 0 };
 
     wc.lpszClassName         = L"Application";
     wc.hInstance             = hInstance;
-    wc.hbrBackground         = GetSysColorBrush(COLOR_3DFACE);
+    wc.hbrBackground         = CreateSolidBrush(RGB(255, 0, 0)); // GetSysColorBrush(COLOR_3DFACE);
     wc.lpfnWndProc           = WndProc;
     wc.hCursor               = LoadCursorW(0, IDC_ARROW);
 
     g_hinst                  = hInstance;
 
     RegisterClassW(&wc);
-    hwnd = CreateWindowW(
-        wc.lpszClassName, L"Burning control", WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN, 100, 100, 400, 250, 0, 0, hInstance, 0
+    hwnd = CreateWindowExW(
+        0L,
+        wc.lpszClassName,
+        L"Burning control",
+        (0x00000000L | 0x00C00000L | 0x00080000L | 0x00040000L | 0x00020000L | 0x00010000L) | 0x10000000L | 0x02000000L,
+        100,
+        100,
+        400,
+        250,
+        0,
+        0,
+        hInstance,
+        0
     );
 
     while (GetMessageW(&msg, NULL, 0, 0)) DispatchMessageW(&msg);
@@ -40,7 +51,7 @@ int WINAPI       wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lp
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    static HWND          hwndTrack, hwndBurn;
+    static HWND          hwndTrack_0, hwndTrack_1, hwndTrack_2, hwndBurn;
     WNDCLASSW            rwc = { 0 };
 
     INITCOMMONCONTROLSEX InitCtrlEx;
@@ -64,11 +75,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 WS_EX_STATICEDGE, L"BurningControl", NULL, WS_CHILD | WS_VISIBLE, 0, 330, 490, 30, hwnd, (HMENU) 1, NULL, NULL
             );
 
-            hwndTrack = CreateWindowExW(
+            hwndTrack_0 = CreateWindowExW(
                 0,
                 TRACKBAR_CLASSW,
                 NULL,
-                WS_CHILD | WS_VISIBLE | TBS_FIXEDLENGTH | TBS_NOTICKS,
+                WS_CHILD | WS_VISIBLE | TBS_FIXEDLENGTH | TBS_AUTOTICKS,
                 40,
                 25,
                 150,
@@ -79,17 +90,57 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 NULL
             );
 
-            SendMessageW(hwndTrack, TBM_SETRANGE, TRUE, MAKELONG(0, 750));
-            SendMessageW(hwndTrack, TBM_SETPAGESIZE, 0, 20);
-            SendMessageW(hwndTrack, TBM_SETTICFREQ, 20, 0);
-            SendMessageW(hwndTrack, TBM_SETPOS, TRUE, 150);
+            hwndTrack_1 = CreateWindowExW(
+                0,
+                TRACKBAR_CLASSW,
+                NULL,
+                WS_CHILD | WS_VISIBLE | TBS_FIXEDLENGTH | TBS_AUTOTICKS,
+                40,
+                75,
+                150,
+                25,
+                hwnd,
+                (HMENU) 3,
+                g_hinst,
+                NULL
+            );
+
+            hwndTrack_2 = CreateWindowExW(
+                0,
+                TRACKBAR_CLASSW,
+                NULL,
+                WS_CHILD | WS_VISIBLE | TBS_FIXEDLENGTH | TBS_AUTOTICKS,
+                40,
+                125,
+                150,
+                25,
+                hwnd,
+                (HMENU) 4,
+                g_hinst,
+                NULL
+            );
+
+            SendMessageW(hwndTrack_0, TBM_SETRANGE, TRUE, MAKELONG(0, 750));
+            SendMessageW(hwndTrack_0, TBM_SETPAGESIZE, 0, 20);
+            SendMessageW(hwndTrack_0, TBM_SETTICFREQ, 20, 0);
+            SendMessageW(hwndTrack_0, TBM_SETPOS, TRUE, 150);
+
+            SendMessageW(hwndTrack_1, TBM_SETRANGE, TRUE, MAKELONG(0, 750));
+            SendMessageW(hwndTrack_1, TBM_SETPAGESIZE, 0, 20);
+            SendMessageW(hwndTrack_1, TBM_SETTICFREQ, 20, 0);
+            SendMessageW(hwndTrack_1, TBM_SETPOS, TRUE, 150);
+
+            SendMessageW(hwndTrack_2, TBM_SETRANGE, TRUE, MAKELONG(0, 750));
+            SendMessageW(hwndTrack_2, TBM_SETPAGESIZE, 0, 20);
+            SendMessageW(hwndTrack_2, TBM_SETTICFREQ, 20, 0);
+            SendMessageW(hwndTrack_2, TBM_SETPOS, TRUE, 150);
             break;
 
         case WM_SIZE : SetWindowPos(hwndBurn, NULL, 0, HIWORD(lParam) - 30, LOWORD(lParam), 30, SWP_NOZORDER); break;
 
         case WM_HSCROLL :
 
-            g_pos = SendMessageW(hwndTrack, TBM_GETPOS, 0, 0);
+            g_pos = SendMessageW(hwndTrack_0, TBM_GETPOS, 0, 0);
             InvalidateRect(hwndBurn, NULL, TRUE);
             break;
 
