@@ -14,7 +14,7 @@
 # this will first disable all available (checks that were enabled by default) checks. then will enable all checks under the category
 # clang-analyzer-* (note the use of wildcard here) except for checks that were under the subcategory clang-analyzer-cplusplus* (again note the ocurrence of the wildcard here)
 
-# come clang-tidy checks are draconian and overly pedantic. there are few ways to suppress such warnings/errors.
+# some clang-tidy checks are draconian and overly pedantic. there are few ways to suppress such warnings/errors.
 # check specific workarounds are available to disable select instances of certain diagnostics!
 # bugprone-use-after-move can be silenced by re-initializing the variable after it has been moved out
 # bugprone-string-integer-assignment can be suppressed by explicitly casting the integer to char
@@ -71,7 +71,64 @@ Checks: >
   bugprone-chained-comparison,
   bugprone-dynamic-static-initializers,
   bugprone-easily-swappable-parameters,
-  bugprone-implicit-widening-of-multiplication-result
+  bugprone-implicit-widening-of-multiplication-result,
+  bugprone-inc-dec-in-conditions,
+  bugprone-incorrect-roundings,
+  bugprone-infinite-loop,
+  bugprone-integer-division,
+  bugprone-macro-parentheses,
+  bugprone-macro-repeated-side-effects,
+  bugprone-misplaced-operator-in-strlen-in-alloc,
+  bugprone-misplaced-pointer-arithmetic-in-alloc,
+  bugprone-misplaced-widening-cast,
+  bugprone-multi-level-implicit-pointer-conversion,
+  bugprone-multiple-statement-macro,
+  bugprone-non-zero-enum-to-bool-conversion,
+  bugprone-not-null-terminated-result,
+  bugprone-redundant-branch-condition,
+  bugprone-reserved-identifier,
+  bugprone-signal-handler,
+  bugprone-signed-char-misuse,
+  bugprone-sizeof-expression,
+  bugprone-spuriously-wake-up-functions,
+  bugprone-suspicious-enum-usage,
+  bugprone-suspicious-include,
+  bugprone-suspicious-memory-comparison,
+  bugprone-suspicious-memset-usage,
+  bugprone-suspicious-missing-comma,
+  bugprone-suspicious-realloc-usage,
+  bugprone-suspicious-semicolon,
+  bugprone-suspicious-string-compare,
+  bugprone-swapped-arguments,
+  bugprone-switch-missing-default-case,
+  bugprone-terminating-continue,
+  bugprone-too-small-loop-variable,
+  bugprone-unsafe-functions,
+  bugprone-unused-return-value,
+  cert-env33-c,
+  cert-err33-c,
+  cert-err34-c,
+  cert-flp30-c,
+  cppcoreguidelines-init-variables,
+  google-runtime-int,
+  llvm-include-order,
+  misc-confusable-identifiers,
+  misc-definitions-in-headers,
+  misc-header-include-cycle,
+  misc-include-cleaner,
+  misc-misleading-identifier,
+  misc-no-recursion,
+  misc-redundant-expression,
+  misc-static-assert,
+  misc-unused-parameters,
+  modernize-use-bool-literals,
+  readability-avoid-nested-conditional-operator,
+  readability-avoid-return-with-void-value,
+  readability-avoid-unconditional-preprocessor-if,
+  readability-const-return-type,
+  readability-duplicate-include,
+  readability-else-after-return,
+  readability-function-size,
 
 
 # -* disables all default checks. doing this as I want to handpick the checks I want without any interference from clang-tidy's defaults.
@@ -83,13 +140,13 @@ ExtraArgs: ['-Wall', '-Wextra', '--std=c23', '-c', '-O0', '--pedantic', '-DDEBUG
 FormatStyle: file
 # format the source file using the specs in the .clang-format file.
 
-HeaderFileExtensions:         ['', 'h', 'cuh']
+HeaderFileExtensions:         ['', 'h']
 # the empty strings is for cpp standard headers e.g. iomanip
 
 HeaderFilterRegex:   ''
 # ignore diagnostics from c++ STL headers.
 
-ImplementationFileExtensions: ['c', 'cu']
+ImplementationFileExtensions: ['c']
 
 WarningsAsErrors: '*'
 # treat all clang-tidy warnings as errors, similar to -Werr, but for linting
@@ -143,90 +200,46 @@ CheckOptions:
   - key: bugprone-implicit-widening-of-multiplication-result.UseCXXHeadersInCppSources
     value: true
 
-#################
-# Check details #
-#################
+  - key: bugprone-not-null-terminated-result.WantToUseSafeFunctions
+    value: true
 
-# 1) bugprone-argument-comment
-# checks whether the argument comment used in a function invocation is pertinet to the argument name
-# e.g. if the syntax of a function is double powerl(const double value, const double exponent)
-# this will check the presence of pertinent argument comments
-# i.e it expects something like this :=> const double x = powerl(/*value=*/12.9759475, /*exponent=*/4.6424);
-# and will issue a diagnostic when there is a possible mistake, identifiable to its heuristics
-# const double x = powerl(/*velua=*/12.9759475, /*expinant=*/4.6424); will lead to the detection of spelling errors
-# however when the heuristics decide that the comment preceding an argument isn't intented as an argument comment, no diagnostics will be issued.
-# const double x = powerl(/*pi=*/12.9759475, /*square=*/2.000); probably won't raise any alarms.
+  - key: bugprone-signal-handler.AsyncSafeFunctionSet
+    value: POSIX
 
-# 2) bugprone-assert-side-effect
-# finds and issues diagnoses where assert()s could cause ininted behaviour
-# has three following options
-# AssertMacros - A comma-separated list of the names of assert macros to be checked.
-# CheckFunctionCalls - Whether to treat non-const member and non-member functions as they produce side effects.
-# Disabled by default because it can increase the number of false positive warnings.
-# IgnoredFunctions - A semicolon-separated list of the names of functions or methods to be considered as not having side-effects.
-# Regular expressions are accepted, e.g. [Rr]ef(erence)?$ matches every type with suffix Ref, ref, Reference and reference.
-# The default is empty. If a name in the list contains the sequence :: it is matched against the qualified typename
-# (i.e. namespace::Type, otherwise it is matched against only the type name (i.e. Type).
+  - key: bugprone-sizeof-expression.WarnOnSizeOfConstant
+    value: true
+  - key: bugprone-sizeof-expression.WarnOnSizeOfIntegerExpression
+    value: true
+  - key: bugprone-sizeof-expression.WarnOnSizeOfCompareToConstant
+    value: true
+  - key: bugprone-sizeof-expression.WarnOnSizeOfPointerToAggregate
+    value: true
 
-# 3) bugprone-assignment-in-if-condition
-# warns when assignments are made inside if() conditionals
-# e.g. size_t counts;
-# if(counts = getCounts()) // will lead to a diagnost
-# This is identified by both -Wparentheses and this check - should it have been: if (f == 4) ?
-# this check will report assignments inside if() clauses even if there's an extra pair of parentheses around
-# e.g. if((counts = getCounts()))
+  - key: bugprone-suspicious-enum-usage.StrictMode
+    value: 1
 
-# 4) bugprone-bool-pointer-implicit-conversion
-# checks whether a pointer to bool gets treated as a bool
-# const bool* boolptr = nullptr;
-# if(boolptr){ } // this will be flagged
-# THIS CHECK DOESN'T APPLY TO OTHER TYPE OF POINTERS!
-# const uintptr_t* const ptr = &var;
-# if(ptr) // is okay
-# doesn't seem to work for C TUs.
+  - key: bugprone-too-small-loop-variable.MagnitudeBitsUpperLimit
+    value: 30
 
-# 5) bugprone-branch-clone
-# detects the presence of identical statement blocks inside if else blocks and switch case blocks.
-# also receptive to ternary comparisons
+  - key: google-runtime-int.UnsignedTypePrefix
+    value: uint
+  - key: google-runtime-int.SignedTypePrefix
+    value: int
+  - key: google-runtime-int.TypeSuffix
+    value: 32_t
 
-# 6) bugprone-casting-through-void
-# warns about casts that are brokered through an intermediate cast to a void*
-# e.g.
-# using IntegerPointer = int *;
-# double *ptr;
-# static_cast<IntegerPointer>(static_cast<void *>(ptr)); // WRONG
-# reinterpret_cast<IntegerPointer>(reinterpret_cast<void *>(ptr)); // WRONG
-# (IntegerPointer)(void *)ptr; // WRONG
-# IntegerPointer(static_cast<void *>(ptr)); // WRONG
+  - key: misc-unused-parameters.StrictMode
+    value: true
 
-# 7) bugprone-chained-comparison
-# warns about chained comparisons that are likely to yield unwanted results
-# e.g.
-# int a = 2, b = 6, c = 4;
-# if (a < b < c) {  // what the programmer meant could be if((a < b) && (b < c))
-#     // This block will be executed
-# }
-# bool a = false, b = false, c = true;
-# if (a == b == c) {  // if((a == b) && (b == c)) :(
-#     // This block will be executed
-# }
-
-# 8) bugprone-dynamic-static-initializers
-# Finds instances of static variables that are dynamically initialized in header files.
-# int foo() {
-#   static int k = bar();
-#   return k;
-# }
-# When synchronization of static initialization is disabled, if two threads both call foo for the first time, there is the possibility that
-# k will be double initialized, creating a race condition.
-
-# 9) bugprone-easily-swappable-parameters
-# Finds function definitions where parameters of convertible types follow each other directly, making call sites prone to calling the function
-# with swapped (or badly ordered) arguments.
-# void drawPoint(int X, int Y) { /* ... */ }
-# FILE *open(const char *Dir, const char *Name, Flags Mode) { /* ... */ }
-# in the above two functions it's easy to pass arguments in wrong positions since adjacent arguments have same types
-# More elaborate and type-safe constructs, such as opaque typedefs or strong types should be used instead, to prevent a mistaken order of arguments.
-# typedef struct { int X; int Y; } Coord2D;
-# void drawPoint(const Coord2D Pos) { /* ... */ }
-# FILE *open(const Path &Dir, const Filename &Name, Flags Mode) { /* ... */ }
+  - key: readability-function-size.LineThreshold
+    value: 500
+  - key: readability-function-size.StatementThreshold
+    value: 400
+  - key: readability-function-size.BranchThreshold
+    value: 100
+  - key: readability-function-size.ParameterThreshold
+    value: 6
+  - key: readability-function-size.NestingThreshold
+    value: 10
+  - key: readability-function-size.VariableThreshold
+    value: 20

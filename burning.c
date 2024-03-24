@@ -17,7 +17,7 @@ HINSTANCE        g_hinst;
 LRESULT          g_pos = 150;
 
 int WINAPI       wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdLine, int nCmdShow) {
-    [[maybe_unused]] HWND hwnd;                                  // needs clang and -std=c23
+    [[maybe_unused]] HWND hwnd; // needs clang and -std=c23
     MSG                   msg;
     WNDCLASSW             wc = { 0 };
 
