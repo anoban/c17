@@ -16,7 +16,8 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 HINSTANCE        g_hinst;
 LRESULT          g_pos = 150;
 
-int WINAPI       wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdLine, int nCmdShow) {
+int WINAPI
+wWinMain(HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance, [[maybe_unused]] PWSTR lpCmdLine, [[maybe_unused]] int nCmdShow) {
     [[maybe_unused]] HWND hwnd; // needs clang and -std=c23
     MSG                   msg;
     WNDCLASSW             wc = { 0 };

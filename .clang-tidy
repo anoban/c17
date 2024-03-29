@@ -52,7 +52,7 @@
 
 ########################################################
 ########################################################
-#                    IMPORTANT!                        #
+#                TAILOR MADE FOR C                     #
 ########################################################
 # AVOID TRAILING INLINE COMMENTS IN .clang-tidy FILES! #
 ########################################################
@@ -62,7 +62,6 @@
 
 Checks: >
   -*,
-  bugprone-argument-comment,
   bugprone-assert-side-effect,
   bugprone-assignment-in-if-condition,
   bugprone-bool-pointer-implicit-conversion,
@@ -70,7 +69,6 @@ Checks: >
   bugprone-casting-through-void,
   bugprone-chained-comparison,
   bugprone-dynamic-static-initializers,
-  bugprone-easily-swappable-parameters,
   bugprone-implicit-widening-of-multiplication-result,
   bugprone-inc-dec-in-conditions,
   bugprone-incorrect-roundings,
@@ -86,7 +84,6 @@ Checks: >
   bugprone-non-zero-enum-to-bool-conversion,
   bugprone-not-null-terminated-result,
   bugprone-redundant-branch-condition,
-  bugprone-reserved-identifier,
   bugprone-signal-handler,
   bugprone-signed-char-misuse,
   bugprone-sizeof-expression,
@@ -106,7 +103,6 @@ Checks: >
   bugprone-unsafe-functions,
   bugprone-unused-return-value,
   cert-env33-c,
-  cert-err33-c,
   cert-err34-c,
   cert-flp30-c,
   cppcoreguidelines-init-variables,
@@ -115,7 +111,6 @@ Checks: >
   misc-confusable-identifiers,
   misc-definitions-in-headers,
   misc-header-include-cycle,
-  misc-include-cleaner,
   misc-misleading-identifier,
   misc-no-recursion,
   misc-redundant-expression,
@@ -129,7 +124,21 @@ Checks: >
   readability-duplicate-include,
   readability-else-after-return,
   readability-function-size,
+  readability-identifier-length,
+  readability-implicit-bool-conversion,
+  readability-inconsistent-declaration-parameter-name,
+  readability-isolate-declaration,
+  readability-magic-numbers,
+  readability-misleading-indentation,
+  readability-misplaced-array-index,
+  readability-non-const-parameter,
+  readability-redundant-casting,
+  readability-redundant-control-flow,
+  readability-redundant-declaration,
+  readability-redundant-preprocessor,
 
+
+# TODO: readability-identifier-naming
 
 # -* disables all default checks. doing this as I want to handpick the checks I want without any interference from clang-tidy's defaults.
 
@@ -140,13 +149,12 @@ ExtraArgs: ['-Wall', '-Wextra', '--std=c23', '-c', '-O0', '--pedantic', '-DDEBUG
 FormatStyle: file
 # format the source file using the specs in the .clang-format file.
 
-HeaderFileExtensions:         ['', 'h']
-# the empty strings is for cpp standard headers e.g. iomanip
+HeaderFileExtensions:         ['h', 'cuh']
 
 HeaderFilterRegex:   ''
-# ignore diagnostics from c++ STL headers.
+# ignore diagnostics from c++ STL headers. (FUCK C++ though)
 
-ImplementationFileExtensions: ['c']
+ImplementationFileExtensions: ['c', 'cu']
 
 WarningsAsErrors: '*'
 # treat all clang-tidy warnings as errors, similar to -Werr, but for linting
@@ -162,38 +170,12 @@ UseColor: true
 
 # list of required checks
 CheckOptions:
-  - key: bugprone-argument-comment.StrictMode
-    value: true
-  - key: bugprone-argument-comment.IgnoreSingleArgument
-    value: false
-  - key: bugprone-argument-comment.CommentBoolLiterals
-    value: false
-  - key: bugprone-argument-comment.CommentIntegerLiterals
-    value: false
-  - key: bugprone-argument-comment.CommentFloatLiterals
-    value: false
-  - key: bugprone-argument-comment.CommentStringLiterals
-    value: false
-  - key: bugprone-argument-comment.CommentCharacterLiterals
-    value: false
-  - key: bugprone-argument-comment.CommentUserDefinedLiterals
-    value: false
-  - key: bugprone-argument-comment.CommentNullPtrs
-    value: false
-
   - key: bugprone-assert-side-effect.AssertMacros
     value: 'assert,static_assert'
   - key: bugprone-assert-side-effect.CheckFunctionCalls
     value: false
   - key: bugprone-assert-side-effect.IgnoredFunctions
     value: ''
-
-  - key: bugprone-easily-swappable-parameters.QualifiersMix
-    value: true
-  - key: bugprone-easily-swappable-parameters.ModelImplicitConversions
-    value: true
-  - key: bugprone-easily-swappable-parameters.NamePrefixSuffixSilenceDissimilarityTreshold
-    value: 2
 
   - key: bugprone-implicit-widening-of-multiplication-result.UseCXXStaticCastsInCppSources
     value: false
@@ -243,3 +225,32 @@ CheckOptions:
     value: 10
   - key: readability-function-size.VariableThreshold
     value: 20
+
+  - key: readability-identifier-length.MinimumVariableNameLength
+    value: 3
+  - key: readability-identifier-length.MinimumParameterNameLength
+    value: 3
+  - key: readability-identifier-length.IgnoredParameterNames
+    value: ^[abcnxy]$
+  - key: readability-identifier-length.MinimumLoopCounterNameLength
+    value: 3
+  - key: readability-identifier-length.IgnoredLoopCounterNames
+    value: ^[ijn_]$
+
+  - key: readability-inconsistent-declaration-parameter-name.IgnoreMacros
+    value: false
+  - key: readability-inconsistent-declaration-parameter-name.Strict
+    value: true
+
+  - key: readability-magic-numbers.IgnoredIntegerValues
+    value: ''
+  - key: readability-magic-numbers.IgnorePowersOf2IntegerValues
+    value: false
+  - key: readability-magic-numbers.IgnoredFloatingPointValues
+    value: ''
+  - key: readability-magic-numbers.IgnoreAllFloatingPointValues
+    value: false
+  - key: readability-magic-numbers.IgnoreBitFieldsWidths
+    value: true
+  - key: readability-magic-numbers.IgnoreTypeAliases
+    value: false
