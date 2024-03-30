@@ -110,9 +110,9 @@ typedef enum { RGB, RLE8, RLE4, BITFIELDS } BMPCOMPRESSIONKIND; // uint32_t
 
 #pragma pack(push, 2)
 typedef struct {
-        uint32_t           HEADERSIZE;                          // >= 40 bytes.
+        uint32_t           HEADERSIZE; // >= 40 bytes.
         uint32_t           WIDTH;
-        int32_t            HEIGHT; // usually an unsigned value, a negative value alludes that the pixel data is ordered top down,
+        int32_t            HEIGHT;     // usually an unsigned value, a negative value alludes that the pixel data is ordered top down,
         // instead of the customary bottom up order. bmp images with a - height values may not be compressed!
         uint16_t           NPLANES;       // must be 1
         uint16_t           NBITSPERPIXEL; // 1, 4, 8, 16, 24 or 32
@@ -127,7 +127,7 @@ typedef struct {
 
 // a BMP with BITMAPCOREHEADER cannot be compressed.
 typedef struct {
-        uint32_t HEADERSIZE;    // 12 bytes
+        uint32_t HEADERSIZE; // 12 bytes
         uint16_t WIDTH;
         uint16_t HEIGHT;
         uint16_t NPLANES;       // must be 1
@@ -247,7 +247,7 @@ static inline BMP new_bmp(_In_ wchar_t* file_name) {
 
     image.npixels      = (image.fsize - 54) / 4;
     image.pixel_buffer = malloc(image.fsize - 54);
-    if (!image.pixel_buffer) {         // If malloc failed,
+    if (!image.pixel_buffer) { // If malloc failed,
         wprintf_s(L"Error in %s (%s, %d), malloc returned NULL\n", __FUNCTIONW__, __FILEW__, __LINE__);
         free(buffer);
         return (BMP) {
@@ -364,7 +364,7 @@ static inline BMP to_blacknwhite(_In_ const BMP* image, _In_ const RGBTOBWKIND c
             break;
         case WEIGHTED_AVERAGE :
             for (size_t i = 0; i < local.npixels; ++i) {
-                local.pixel_buffer[i].BLUE = local.pixel_buffer[i].GREEN = local.pixel_buffer[i].RED =            // weighted average
+                local.pixel_buffer[i].BLUE = local.pixel_buffer[i].GREEN = local.pixel_buffer[i].RED = // weighted average
                     (uint8_t) ((local.pixel_buffer[i].BLUE * 0.299L) + (local.pixel_buffer[i].GREEN * 0.587L) +
                                (local.pixel_buffer[i].RED * 0.114L));
             }
