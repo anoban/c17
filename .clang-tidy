@@ -192,7 +192,7 @@ FormatStyle: file
 HeaderFileExtensions:         ['h', 'cuh']
 
 HeaderFilterRegex:   ''
-# ignore diagnostics from c++ STL headers. (FUCK C++ though)
+# ignore diagnostics from c++ STL headers.
 
 ImplementationFileExtensions: ['c', 'cu']
 
@@ -303,10 +303,6 @@ CheckOptions:
 
   - key: readability-identifier-naming.ConstantCase
     value: UPPER_CASE
-  - key: readability-identifier-naming.ConstantParameterCase
-    value: lower_case
-  - key: readability-identifier-naming.ConstantPointerParameterCase
-    value: lower_case
   - key: readability-identifier-naming.EnumCase
     value: UPPER_CASE
   - key: readability-identifier-naming.EnumConstantCase
@@ -319,8 +315,6 @@ CheckOptions:
     value: UPPER_CASE
   - key: readability-identifier-naming.GlobalConstantPointerPrefix
     value: g
-  - key: readability-identifier-naming.GlobalPointerCase
-    value: lower_case
   - key: readability-identifier-naming.GlobalPointerPrefix
     value: g
   - key: readability-identifier-naming.IgnoreMainLikeFunctions
@@ -331,9 +325,5 @@ CheckOptions:
     value: UPPER_CASE
   - key: readability-identifier-naming.MacroDefinitionCase
     value: UPPER_CASE
-  - key: readability-identifier-naming.ParameterCase
-    value: lower_case
-  - key: readability-identifier-naming.ParameterPackCase
-    value: lower_case
   - key: readability-identifier-naming.StaticConstantCase
     value: UPPER_CASE
