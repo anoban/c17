@@ -111,7 +111,7 @@ AlignConsecutiveBitFields:      # Same as `AlignConsecutiveAssignments`, but for
 
 AlignConsecutiveDeclarations:   # Same as `AlignConsecutiveAssignments`, but for declarations.
   Enabled:         true
-  AcrossEmptyLines: true
+  AcrossEmptyLines: false
   AcrossComments:  true
   AlignCompound:   true
   PadOperators:    true

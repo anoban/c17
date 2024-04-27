@@ -372,6 +372,9 @@ FodyWeavers.xsd
 *.x86_64
 *.hex
 
+# Drivers
+*.sys
+
 # Debug files
 *.dSYM/
 *.su
