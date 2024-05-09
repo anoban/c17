@@ -1,0 +1,15 @@
+{
+    "directory": "${fileDirname}",
+    "arguments": [
+        "clang",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-std=c23",
+        "-DDEBUG",
+        "-D_DEBUG",
+        "-O3",
+        "-o ${fileDirname}\\${fileBasenameNoExtension}.exe"
+    ],
+    "file": "${fileBasename}"
+}

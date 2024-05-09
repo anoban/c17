@@ -1,7 +1,7 @@
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
+#include <wchar.h>
 
 struct align {
         bool               first;
@@ -21,5 +21,6 @@ __declspec(align(32)) struct align_ {
 
 int main(void) {
     alignof(struct align);
+    wprintf_s(L"Hi there %s\n", L"Anoban");
     return 0;
 }
