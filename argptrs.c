@@ -37,6 +37,8 @@ static inline void funcv4(const double* dblptr, const float* fltptr) {
     wprintf_s(L"dblptr = %08X, fltptr = %08X\n", dblptr, fltptr);
 }
 
+[[nodiscard]] extern double sum();
+
 int main(void) {
     double       mdbl = 100.00000;
     float        mflt = 100.00000F;
