@@ -1,15 +1,21 @@
-If:
-  PathMatch: .*/.(c|h)$ # .c and .h
 CompileFlags:
   Add: [-Wall, -Wextra, -pedantic, -O0, -std=c23, -c]
-  Compiler:  C:\Program Files\LLVM\bin\clang.exe
+  Compiler:  clang.exe
+  CompilationDatabase: None
 
----
+Completion:
+  AllScopes: Yes
 
-If:
-  PathMatch: .*/.(c|h)pp$  # .cpp and .hpp
-CompileFlags:
-  Add: [-Wall, -Wextra, -pedantic, -O0, -std=c++23, -c]
-  Compiler:  C:\Program Files\LLVM\bin\clang++.exe
+Index:
+  Background: Skip
 
----
+InlayHints:
+  BlockEnd: Yes
+  Designators: Yes
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes
+  TypeNameLimit: 24
+
+Hover:
+  ShowAKA: Yes
