@@ -1,7 +1,6 @@
 #include <assert.h>
+#include <httplib.h>
 #include <stdio.h>
-
-#include "./httplib.h"
 
 BOOL ActivateVirtualTerminalEscapes(VOID) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -38,7 +37,7 @@ SCRHANDLES HttpGet(LPCWSTR pswzServerName, LPCWSTR pswzAccessPoint) {
     // It initializes internal WinHTTP data structures and prepares for future calls from the application.
     hSession                = WinHttpOpen(
         // impersonating Firefox to avoid request denials from automated clients by servers.
-        L"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0",
+        L"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0",
         WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,
         WINHTTP_NO_PROXY_NAME,
         WINHTTP_NO_PROXY_BYPASS,
@@ -89,8 +88,8 @@ SCRHANDLES HttpGet(LPCWSTR pswzServerName, LPCWSTR pswzAccessPoint) {
             0,                       // An unsigned long integer value that contains the length, in bytes, of the optional data.
             0,                       // An unsigned long integer value that contains the length, in bytes, of the total data sent.
             0
-        ); // A pointer to a pointer-sized variable that contains an application-defined value that is passed, with the request handle, to
-           // any callback functions.
+        );  // A pointer to a pointer-sized variable that contains an application-defined value that is passed, with the request handle, to
+            // any callback functions.
     }
 
     if (!bHttpResults) {
@@ -122,7 +121,7 @@ LPSTR ReadHttpResponse(SCRHANDLES scrHandles, DWORD64* dwnReceivedBytes) {
     // last write offset, so the next write operation can start from there such that we can prevent
     // overwriting previously written memory.
 
-    LPSTR     pszBuffer = (LPSTR) malloc(RESP_BUFF_SIZE); // now that's 1 GiB.
+    LPSTR pszBuffer = (LPSTR) malloc(RESP_BUFF_SIZE); // now that's 1 GiB.
     // if malloc() failed,
     if (!pszBuffer) {
         fprintf_s(stderr, "Memory allocation failed. Error %ld\n", GetLastError());
@@ -132,7 +131,7 @@ LPSTR ReadHttpResponse(SCRHANDLES scrHandles, DWORD64* dwnReceivedBytes) {
     ZeroMemory(pszBuffer, RESP_BUFF_SIZE); // zero out the buffer.
     LPSTR pszLastWriteOffset = pszBuffer;
 
-    BOOL  bReception         = FALSE;
+    BOOL bReception          = FALSE;
     bReception               = WinHttpReceiveResponse(hRequest, NULL);
 
     if (!bReception) {
@@ -254,6 +253,4 @@ void __stdcall UrlSplitterW(
     wprintf_s(L"Access point name: %ls\n", pswzAccessPoint);
     wprintf_s(L"File name: %ls\n", pswzFileName);
 #endif
-
-    return;
 }
