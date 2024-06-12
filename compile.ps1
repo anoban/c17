@@ -38,6 +38,7 @@ $cflags = @(
     "/TC",
     "/Wall",
     "/wd4710",      # not inlined
+    "/wd4711",      # selected for inlining
     "/wd4820",      # struct padding
     "/Zc:preprocessor",
     "/link /DEBUG:NONE"
