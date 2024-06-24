@@ -22,7 +22,7 @@ static_assert(0b1111'1111'1111'1111 == USHRT_MAX);
     return __val * __val * __val;
 }
 
-[[unsequenced, nodiscard, reproducible]] double areaofsun(void) { 4.0000 / 3.00000000 * M_PI* powl(696340.0, 3.0000000000); }
+[[unsequenced, nodiscard, reproducible]] double areaofsun(void) { return 4.0000 / 3.00000000 * M_PI * powl(696340.0, 3.0000000000); }
 
 int wmain(void) {
     const unsigned short smax                 = SHRT_MAX;
@@ -41,6 +41,10 @@ int wmain(void) {
     [[maybe_unused]] typeof(smax) qualified             = 0;
 
     // [[maybe_unused]] const void* _ptr                   = nullptr; // MSVC still has no support for nullptr!
+
+    const volatile bool wrong                           = false;
+    typeof(wrong)       right                           = true;
+    typeof_unqual(wrong) wrong_too                      = false;
 
     return EXIT_SUCCESS;
 }

@@ -3,46 +3,41 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct matrix {
+typedef struct matrix4x4 {
         size_t nrows;
         size_t ncols;
         double buffer[16];
-} matrix_t;
+} matrix4x4_t;
 
-static inline matrix_t __stdcall matmul(_In_ const matrix_t left, _In_ const matrix_t right) {
-    matrix_t      dotprod = { .nrows = 0, .ncols = 0, .buffer = { 0 } };
+static inline matrix4x4_t __stdcall matmul(_In_ const matrix4x4_t* const left, _In_ const matrix4x4_t* const right) {
+    matrix4x4_t   dotprod = { .nrows = 0, .ncols = 0, .buffer = { 0 } };
     double        temp    = 0.000; // a temporary accumulator
     unsigned long caret   = 0;     // keep track of the write offset in the dot product
 
-    if (left.ncols != right.nrows) {
+    if (left->ncols != right->nrows || left->nrows != right->ncols) {
         fputws(L"Error in matmul():: dimensions incompatible for matrix multiplication!\n", stderr);
         return dotprod;
     };
 
-    dotprod.nrows          = left.nrows;  // dot product will have the number of rows of the first matrix
-    dotprod.ncols          = right.ncols; // and the number of columns of the second matrix
+    dotprod.nrows = left->nrows;  // dot product will have the number of rows of the first matrix
+    dotprod.ncols = right->ncols; // and the number of columns of the second matrix
 
-    const unsigned leftec  = left.nrows * left.ncols;
-    const unsigned rightec = right.nrows * right.ncols;
-
-    for (unsigned leftr = 0; leftr < leftec; leftr += left.ncols) { // for each row in the first matrix,
-        for (unsigned reps = 0; reps < right.ncols; ++reps) {       // for each column in the second matrix
-
-            for (unsigned r = leftr; r < leftr + left.ncols; ++r) {
-                for (unsigned c = reps; c < rightec; c += right.ncols) {
-                    temp += left.buffer[r] * right.buffer[c];
-                    //
+    for (size_t lsoff = 0; lsoff < left->ncols * left->nrows; lsoff += left->ncols) { // left start offset
+        for (size_t rsoff = 0; rsoff < count; rsoff +=) {
+            for (size_t i = 0; i < count; i++) {
+                for (size_t i = 0; i < count; i++) { /* code */
                 }
             }
-            dotprod.buffer[caret++] = temp;
-            temp                    = 0.000;
         }
     }
+
+    dotprod.buffer[caret++] = temp;
+    temp                    = 0.000;
 
     return dotprod;
 }
 
-static inline void print(const matrix_t* const restrict matrix) {
+static inline void print(const matrix4x4_t* const restrict matrix) {
     static unsigned long caret          = 0;
     static wchar_t       rowbuffer[150] = { 0 };
 
@@ -63,18 +58,16 @@ static inline void print(const matrix_t* const restrict matrix) {
 }
 
 int wmain(void) {
-    const matrix_t identity = {
-        // a 4 x 4 identity matrix
-        .nrows  = 2,
-        .ncols  = 2,
-        .buffer = { 1.0, 0.0, 0.0, 1.0 }
+    // a 4 x 4 identity matrix
+    const matrix4x4_t identity = {
+        .nrows = 4, .ncols = 4, .buffer = { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 }
     };
 
-    const matrix_t some = {
-        .nrows = 2, .ncols = 2, .buffer = { 2.0, 4.0, 6.0, 8.0 }
+    const matrix4x4_t some = {
+        .nrows = 4, .ncols = 4, .buffer = { 2.0, 4.0, 6.0, 8.0 }
     };
 
-    const matrix_t dotprod = matmul(identity, some);
+    const matrix4x4_t dotprod = matmul(identity, some);
 
     print(&identity);
     _putws(L"");
