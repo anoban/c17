@@ -5,6 +5,7 @@
 
 #define __STDC_WANT_SECURE_LIB__ 1
 #include <limits.h>
+#include <sal.h> // to make gcc happy
 #define _USE_MATH_DEFINES
 #include <assert.h>
 #include <math.h>
@@ -42,9 +43,9 @@ int wmain(void) {
 
     // [[maybe_unused]] const void* _ptr                   = nullptr; // MSVC still has no support for nullptr!
 
-    const volatile bool wrong                           = false;
-    typeof(wrong)       right                           = true;
-    typeof_unqual(wrong) wrong_too                      = false;
+    [[maybe_unused]] const volatile bool wrong          = false;
+    [[maybe_unused]] typeof(wrong)       right          = true;
+    [[maybe_unused]] typeof_unqual(wrong) wrong_too     = false;
 
     return EXIT_SUCCESS;
 }
