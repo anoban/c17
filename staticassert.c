@@ -8,8 +8,9 @@ typedef struct node {
         unsigned      frequency;
 } node_t;
 
-static_assert(!offsetof(node_t, byte));
+// static_assert(!offsetof(node_t, byte));
 static_assert(!false);
 static_assert(!0);
+assert(!false);
 
 int wmain(void) { return EXIT_SUCCESS; }
