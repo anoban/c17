@@ -1,3 +1,5 @@
+// clang .\rvalues.c -O3 -Wall -Wextra -pedantic -std=c23 -o .\rvalues.exe
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,11 +29,12 @@ int main(void) {
     const unsigned long memex = GetPacked().x;
     printf_s("%lu\n", memex);
 
-    char* const zee = GetPacked().z;
+    const char* const zee = GetPacked().z; // string literals are lvalues!
     puts(zee);
+    const char* const zed = GetRegular().z;
+    puts(zed);
 
-    // let's try some trickery
-    // if the return values of GetPacked() were stored in memory, unused member variables could be addressed too!!
+    // if the return values of GetPacked() were stored in memory, the unused member variables could be addressed too!!
     const long double* const maybe_y = (long double*) (zee - sizeof(long double));
     printf_s("%.10Lf 6.3764527645\n", *maybe_y); // access violations huh?
     const unsigned long* const maybe_x = (unsigned long*) (zee - sizeof(long double) - sizeof(unsigned long));
