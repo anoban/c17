@@ -23,10 +23,10 @@ typedef struct tower {
 
 static __forceinline void __stdcall init_towers(tower_t* const restrict object) {
     // decide the number of discs to place each of the three towers
-    const unsigned discs_tower_0 = rand() % TOTAL_DISCS;
-    const unsigned discs_tower_1 = (TOTAL_DISCS - discs_tower_0) % (rand() % (TOTAL_DISCS - discs_tower_0));
+    const unsigned discs_tower_0 = rand() % TOTAL_DISCS;                                                     // must be 100 or less
+    const unsigned discs_tower_1 = (TOTAL_DISCS - discs_tower_0) % (rand() % (TOTAL_DISCS - discs_tower_0)); // Integer division by zero.
     const unsigned discs_tower_2 = TOTAL_DISCS - (discs_tower_0 + discs_tower_1);
-    assert(discs_tower_0 + discs_tower_1 + discs_tower_2 == TOTAL_DISCS);
+    if ((discs_tower_0 + discs_tower_1 + discs_tower_2) != TOTAL_DISCS) _putws(L"something's wrong somewhere!");
 
     unsigned i = 0;
     for (; i < discs_tower_0; ++i) object->tower_0[i] = rand() % MAX_DIAMATER;
@@ -45,7 +45,7 @@ static_assert(offsetof(tower_t, tower_0) == 0LLU);
 static_assert(offsetof(tower_t, tower_1) == 400LLU);
 static_assert(offsetof(tower_t, tower_2) == 800LLU);
 
-static inline void test_init_towers() {
+static inline void test_init_towers(void) {
     tower_t dummy = { 0 };
     for (unsigned i = 0; i < 200; ++i) init_towers(&dummy);
 }
