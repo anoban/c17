@@ -12,16 +12,16 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define TOTAL_DISCS  100LLU // maximum discs allowed in a game
-#define MAX_DIAMATER 100    // maximum diameter a disc can have
+#define TOTAL_DISCS  50LLU // maximum discs allowed in a game
+#define MAX_DIAMATER 100   // maximum diameter a disc can have
 
-typedef struct tower {
-        int tower_0[TOTAL_DISCS];
-        int tower_1[TOTAL_DISCS];
-        int tower_2[TOTAL_DISCS];
-} tower_t;
+typedef struct board {     // the game board with three towers
+        int a[TOTAL_DISCS];
+        int b[TOTAL_DISCS];
+        int c[TOTAL_DISCS];
+} board_t;
 
-static __forceinline void __stdcall init_towers(tower_t* const restrict object) {
+static __forceinline void __stdcall prepare_board(_In_ register board_t* const restrict object) {
     // decide the number of discs to place each of the three towers
     const unsigned discs_tower_0 = rand() + 1 % TOTAL_DISCS; // must be 100 or less (could not be 0)
     const unsigned discs_tower_1 = (TOTAL_DISCS - discs_tower_0) % ((rand() + 1) % (TOTAL_DISCS - discs_tower_0));
@@ -29,35 +29,35 @@ static __forceinline void __stdcall init_towers(tower_t* const restrict object) 
     assert((discs_tower_0 + discs_tower_1 + discs_tower_2) == TOTAL_DISCS);
 
     unsigned i = 0;
-    for (; i < discs_tower_0; ++i) object->tower_0[i] = rand() % MAX_DIAMATER;
-    for (i = 0; i < discs_tower_1; ++i) object->tower_1[i] = rand() % MAX_DIAMATER;
-    for (i = 0; i < discs_tower_2; ++i) object->tower_2[i] = rand() % MAX_DIAMATER;
+    for (; i < discs_tower_0; ++i) object->a[i] = rand() % MAX_DIAMATER;
+    for (i = 0; i < discs_tower_1; ++i) object->b[i] = rand() % MAX_DIAMATER;
+    for (i = 0; i < discs_tower_2; ++i) object->c[i] = rand() % MAX_DIAMATER;
 
     _putws(L"initialization successfull!");
 }
 
-static __forceinline bool __stdcall check_towers(const tower_t* const restrict tower) { }
+static __forceinline bool __stdcall check_towers(const board_t* const restrict board) { }
 
 #pragma region TEST
 
-static_assert(sizeof(tower_t) == 1200LLU);
-static_assert(offsetof(tower_t, tower_0) == 0LLU);
-static_assert(offsetof(tower_t, tower_1) == 400LLU);
-static_assert(offsetof(tower_t, tower_2) == 800LLU);
+static_assert(sizeof(board_t) == sizeof(int) * TOTAL_DISCS * 3);
+static_assert(offsetof(board_t, a) == sizeof(int) * TOTAL_DISCS * 0);
+static_assert(offsetof(board_t, b) == sizeof(int) * TOTAL_DISCS * 1);
+static_assert(offsetof(board_t, c) == sizeof(int) * TOTAL_DISCS * 2);
 
 static inline void test_init_towers(void) {
-    tower_t dummy = { 0 };
-    for (unsigned i = 0; i < 200; ++i) init_towers(&dummy);
+    board_t dummy = { 0 };
+    for (unsigned i = 0; i < 200; ++i) prepare_board(&dummy);
 }
 
 #pragma endregion
 
 int main(void) {
     srand(time(NULL)); // globally seed the random number generator
-    static tower_t hanoi = { 0 };
+    static board_t hanoi = { 0 };
 
     test_init_towers();
 
-    init_towers(&hanoi);
+    prepare_board(&hanoi);
     return EXIT_SUCCESS;
 }

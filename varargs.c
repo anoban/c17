@@ -1,4 +1,5 @@
 #define _USE_MATH_DEFINES
+#include <assert.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -11,7 +12,12 @@
 typedef float       float32;
 typedef long double float64;
 
+static_assert(sizeof(long double) == 8); // sizeof(long double) is 16 with /Qlong-double
+static_assert(sizeof(double) == 8);
+static_assert(sizeof(float) == 4);
+
 static inline float64 __stdcall sum(_In_ const unsigned long long argc, _In_opt_count_(argc)...) {
+    assert(argc);
     // the number of optional arguments are determined by the values of the mandatory argument
     // or a special value that terminates the optional list of arguments
     // e.g printf_s() has the format string as the mandatory argument and the number of format specifiers determine the number of optional
@@ -20,11 +26,8 @@ static inline float64 __stdcall sum(_In_ const unsigned long long argc, _In_opt_
     va_list argptr = NULL;     // the argument pointer (just a typedef for char*)
     __va_start(&argptr, argc); // captures the stack address of the first optional argument
     float64 sum = 0.000;
-    for (unsigned long long i = 0; i < argc; ++i) {
-        //
-        va_arg(argptr, float64);
-    }
-
+    for (unsigned long long i = 0; i < argc; ++i) sum += va_arg(argptr, int);
+    argptr = NULL; // va_end(argptr) just makes the va_list NULL
     return sum;
 }
 
@@ -37,7 +40,8 @@ int wmain(void) {
     // MSVC gave a very detailed diagnostics :)
 
     const float64 total = // should be 479
-        sum(7,
+        sum(100,
+            7,
             6,
             3,
             5,
@@ -137,6 +141,8 @@ int wmain(void) {
             1,
             5,
             5);
+
+    wprintf_s(L"sum is %Lf\n", total);
 
     return EXIT_SUCCESS;
 }
