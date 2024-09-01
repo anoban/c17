@@ -14,6 +14,9 @@ static __declspec(noinline) double power(_In_ register const double base, _In_ r
     return result;
 }
 
+// implicitly extern
+inline void __cdecl say_hi(void) { _putws(L"Hi from " __FILEW__ "::" __FUNCTIONW__); }
+
 unsigned expo = 12; // globally accessible
 
 int main(void) {
