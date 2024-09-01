@@ -1,17 +1,19 @@
+#include <sal.h>
 #include <stdio.h>
 
-extern unsigned expo;
+extern unsigned expo; // defined in odr_01.c
 
 // non static function
-extern __declspec(noinline) long double __cdecl power(const double register base, const unsigned register exponent) {
-    _putws(__FILEW__ " extern __declspec(noinline) long double __cdecl power(const double register base, const unsigned register exponent)"
-    );
+extern __declspec(noinline) long double __cdecl power(_In_ register const double base, _In_ register const unsigned exponent) {
+    _putws(__FILEW__ " :: " __FUNCTIONW__);
     long double result = base;
-    for (unsigned i = 0; i < exponent; ++i) result *= base;
+    for (unsigned i = 1; i < exponent; ++i) result *= base;
     return result;
 }
 
+// non static function
 extern __declspec(noinline) void __cdecl call(void) {
     expo = (unsigned) power(expo, 3); // will call the power() function defined in this TU
-    wprintf_s(L"expo is now %u\n", expo);
+    // because the power() function defined in odr_01.c is a static function
+    wprintf_s(L"expo is now 12^3 (%u)\n", expo);
 }
