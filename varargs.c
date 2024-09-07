@@ -32,13 +32,16 @@ static inline long double __stdcall sum(_In_ const unsigned long long argc, _In_
 
 // expects the last optional argument to be 0
 static inline long double __stdcall fprod(_In_opt_...) {
-    float*      argptr = NULL;
+    char*       argptr = NULL;
     long double result = 1.0000L;
-    __va_start(&argptr, 1000);
-    while (*argptr) result *= *argptr++;
+
+    __va_start(&argptr, 1);
+    while (*argptr) result *= *(float*) (argptr += sizeof(float) - sizeof(float));
+
     argptr = NULL;
     return result;
 }
+
 int wmain(void) {
     // see what happens if we call printf_s with a format string containing three format specifiers and four optional arguments??
     wprintf_s(L"first = %d, second = %.5f, third = %llu\n", 30, (float) M_PI, 45LLU, 2.71828182845905F);
