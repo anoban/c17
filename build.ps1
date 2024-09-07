@@ -57,7 +57,7 @@ $cflags = @(
 	"/Qfp-speculation:safe",
     "/Qipo",
 	"/Qkeep-static-consts-",
-	"/Qlong-double",
+	# "/Qlong-double", causes formatting errors with _printf_ family of functions
     "/Qscatter-",
     "/Qstd:c23",
     "/Qm64",
