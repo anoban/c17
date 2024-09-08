@@ -28,7 +28,7 @@
 static const uint16_t BMPSOI_LE = ((uint16_t) 'M') << 8 | (uint16_t) 'B';
 
 typedef struct {
-        uint16_t SOI;      // BM
+        uint16_t SOI; // BM
         uint32_t FSIZE;
         uint32_t RESERVED; // this is actually two consecutive 16 bit elements, but who cares :)
         uint32_t PIXELDATASTART;
@@ -55,17 +55,17 @@ typedef struct {
         uint16_t           NPLANES;       // must be 1
         uint16_t           NBITSPERPIXEL; // 1, 4, 8, 16, 24 or 32
         BMPCOMPRESSIONKIND CMPTYPE;
-        uint32_t           IMAGESIZE;     // 0 if not compressed.
-        uint32_t           RESPPMX;       // resolution in pixels per meter along x axis.
-        uint32_t           RESPPMY;       // resolution in pixels per meter along y axis.
-        uint32_t           NCMAPENTRIES;  // number of entries in the colourmap that are used.
-        uint32_t           NIMPCOLORS;    // number of important colors.
+        uint32_t           IMAGESIZE;    // 0 if not compressed.
+        uint32_t           RESPPMX;      // resolution in pixels per meter along x axis.
+        uint32_t           RESPPMY;      // resolution in pixels per meter along y axis.
+        uint32_t           NCMAPENTRIES; // number of entries in the colourmap that are used.
+        uint32_t           NIMPCOLORS;   // number of important colors.
 } __BITMAPINFOHEADER;
 
 // a BMP with BITMAPCOREHEADER cannot be compressed.
 // and is quite rare to come across.
 typedef struct {
-        uint32_t HEADERSIZE;    // 12 bytes
+        uint32_t HEADERSIZE; // 12 bytes
         uint16_t WIDTH;
         uint16_t HEIGHT;
         uint16_t NPLANES;       // must be 1

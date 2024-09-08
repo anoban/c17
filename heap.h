@@ -11,8 +11,8 @@
 
 typedef struct heap {
         size_t size;
-        bool   (*fnptr_pred)(_In_reads_(1) const void* this, _In_reads_(1) const void* next); // predicate
-        void   (*fnptr_dstr)(_In_ const void* mem);                                           // destroyer
+        bool (*fnptr_pred)(_In_reads_(1) const void* this, _In_reads_(1) const void* next); // predicate
+        void (*fnptr_dstr)(_In_ const void* mem);                                           // destroyer
         void** tree;
 } heap_t;
 

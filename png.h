@@ -19,7 +19,7 @@ typedef struct {
         uint32_t CRC32;   // a 32 bit Cyclic Redundancy Check (CRC) value calculated from the data.
 } PNG_CHUNK_HEAD;
 
-                          // Critical chunks.
+// Critical chunks.
 // these are chunks that every decoder must absolutely process in order to decode the image.
 // PNG standard defines 4 critical chunks,
 // "IHDR"
@@ -84,7 +84,7 @@ uint32_t crc_table[UCHAR_MAX + 1] = { 0 };
 void __forceinline __stdcall init_crc_table(void) {
     for (uint32_t i = 0; i <= UCHAR_MAX; ++i) { // each byte in the table.
         crc_table[i] = i;
-        for (uint32_t j = 0; j < 8; ++j) {      // each bit position in a byte
+        for (uint32_t j = 0; j < 8; ++j) { // each bit position in a byte
 
             // 0x1U is 0000 0000 0000 0000 0000 0000 0000 0001
             // if anything is to yield 0000 0000 0000 0000 0000 0000 0000 0000 with a bitwise and operation
@@ -126,7 +126,7 @@ void __forceinline __stdcall init_crc_table(void) {
 
     #endif // __RUNTIME_COMPUTE_CRC32__
 
-           // It's better to do the computation beforehand and just store the values, instead of doing the computations
+// It's better to do the computation beforehand and just store the values, instead of doing the computations
 // in real time. If C++, constexpr could be used, welp!
 
     #ifdef __CRC32_LOOKUP_NEEDED__
@@ -244,11 +244,11 @@ typedef struct {
 
 // prototypes.
 
-bool           validate_png_signature(_In_ const uint8_t* restrict png_stream, _In_ const uint64_t fsize);
+bool validate_png_signature(_In_ const uint8_t* restrict png_stream, _In_ const uint64_t fsize);
 
 PNG_CHUNK_HEAD extract_IHDR(_In_ const uint8_t* restrict png_stream, _In_ const uint64_t fsize);
 
-IHDR_DATA      extract_IHDR_data(_In_ const PNG_CHUNK_HEAD ihdr_head);
+IHDR_DATA extract_IHDR_data(_In_ const PNG_CHUNK_HEAD ihdr_head);
 
-void           print_IHDR_info(_In_ const PNG_CHUNK_HEAD ihdr_head, _In_ const IHDR_DATA ihdr_data);
+void print_IHDR_info(_In_ const PNG_CHUNK_HEAD ihdr_head, _In_ const IHDR_DATA ihdr_data);
 #endif // ! __PNG__

@@ -179,8 +179,8 @@ static void inline __stdcall sort_bytes(_Inout_ huffman_t* restrict const tree, 
             break;
         }
     }
-    tree->nleaves = 256 - pos;                        // not 255 - pos!
-    tree->nlinks  = tree->nleaves - 1;                // N - 1
+    tree->nleaves = 256 - pos;         // not 255 - pos!
+    tree->nlinks  = tree->nleaves - 1; // N - 1
     return;
 }
 
@@ -196,7 +196,7 @@ static void inline init_leaves(_In_ huffman_t* const restrict tree) {
     for (size_t i = 0; i < tree->nleaves; ++i) {
         tree->nodes[i].byte   = tree->orderedbytes[nskips + i]; // cherry picking only the bytes with non-zero frequencies.
         tree->nodes[i].weight = tree->freqs[tree->nodes[i].byte];
-        tree->nodes[i].left = tree->nodes[i].right = NULL;      // no branches for leaf nodes.
+        tree->nodes[i].left = tree->nodes[i].right = NULL; // no branches for leaf nodes.
     }
     return;
 }
