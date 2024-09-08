@@ -52,8 +52,8 @@ static inline long double __stdcall cost(
     _In_ register const long double             a,
     _In_ register const long double             b
 ) {
-    // loss = (prediction - target) ^ 2
-    // cost = ((prediction - target) ^ 2) / 2 i.e cost is averaged aggregate loss
+    // loss = (prediction - target) ^ 2 / 2
+    // cost is averaged aggregate loss
     long double cost = 0.0000;
     for (size_t i = 0; i < length; ++i) cost += loss(x[i], y[i], a, b); // loss aggregation
     return cost / length;                                               // averaging
