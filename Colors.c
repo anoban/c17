@@ -8,10 +8,10 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK ScrollProc(HWND, UINT, WPARAM, LPARAM);
 
-int              idFocus;
-WNDPROC          OldScroll[3];
+int     idFocus;
+WNDPROC OldScroll[3];
 
-int WINAPI       WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow) {
     static TCHAR szAppName[] = TEXT("Colors1");
     HWND         hwnd;
     MSG          msg;

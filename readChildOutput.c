@@ -13,11 +13,11 @@
 #define BUFSIZE 4096
 
 // Child output is written to this temp file and then read by this parent process (you may want to delete it when you're finished with it)
-char*  tempFile           = "child.out";
+char* tempFile            = "child.out";
 
 // Child process cmd line
 // TCHAR szCmdline[]=TEXT("c:\\windows\\system32\\getmac.exe");
-TCHAR  szCmdline[]        = TEXT("cmd /c dir");
+TCHAR szCmdline[]         = TEXT("cmd /c dir");
 
 HANDLE g_hChildStd_IN_Rd  = NULL;
 HANDLE g_hChildStd_IN_Wr  = NULL;
@@ -26,12 +26,12 @@ HANDLE g_hChildStd_OUT_Wr = NULL;
 
 HANDLE g_hInputFile       = NULL;
 
-void   CreateChildProcess(void);
-void   WriteToPipe(void);
-void   ReadFromPipe(void);
-void   ErrorExit(char*);
+void CreateChildProcess(void);
+void WriteToPipe(void);
+void ReadFromPipe(void);
+void ErrorExit(char*);
 
-int    _tmain(int argc, TCHAR* argv[]) {
+int _tmain(int argc, TCHAR* argv[]) {
     SECURITY_ATTRIBUTES saAttr;
 
     printf("\n->Start of parent execution.\n");
@@ -125,7 +125,7 @@ void CreateChildProcess()
         NULL,         // use parent's current directory
         &siStartInfo, // STARTUPINFO pointer
         &piProcInfo
-    );                // receives PROCESS_INFORMATION
+    ); // receives PROCESS_INFORMATION
 
     // If an error occurs, exit the application.
     if (!bSuccess)

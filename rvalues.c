@@ -14,7 +14,7 @@ typedef struct packed {
 #pragma pack(pop)
 
 typedef struct regular {
-        unsigned long x;     // 4 bytes padding added after data member x
+        unsigned long x; // 4 bytes padding added after data member x
         long double   y;
         char          z[10]; // 6 bytes padding added after data member z
 } regular_t;
@@ -38,7 +38,7 @@ int main(void) {
     const long double* const maybe_y = (long double*) (zee - sizeof(long double));
     printf_s("%.10Lf 6.3764527645\n", *maybe_y); // access violations huh?
     const unsigned long* const maybe_x = (unsigned long*) (zee - sizeof(long double) - sizeof(unsigned long));
-    printf_s("%lu 12345\n", *maybe_x);           // we are winning son!
+    printf_s("%lu 12345\n", *maybe_x); // we are winning son!
     // fucking works woohooo!!!!!
 
     const char* const name = GetRegular().z;
@@ -47,7 +47,7 @@ int main(void) {
     const long double* const willbe_y =
         (long double*) (name - sizeof(long double)); // will work because no padding bytes were added after y
     const unsigned long* const willbe_x = (unsigned long*) (name - sizeof(long double) - sizeof(unsigned long) - 4
-    );                                               // will work because the 4 padding bytes added after x are accounted for
+    ); // will work because the 4 padding bytes added after x are accounted for
     printf_s("%.10Lf 6.3764527645\n", *willbe_y);
     printf_s("%lu 12345\n", *willbe_x);
 

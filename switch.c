@@ -24,11 +24,11 @@ int main(void) {
     // }
 
     switch (84) {
-        case 86 : _putws(L"86");     // fallthrough
-        case 85 : _putws(L"85");     // fallthrough
-        case 84 : _putws(L"84");     // fallthrough
+        case 86 : _putws(L"86"); // fallthrough
+        case 85 : _putws(L"85"); // fallthrough
+        case 84 : _putws(L"84"); // fallthrough
         case 83 : _putws(L"83"); break;
-        case 82 : _putws(L"82");     // fallthrough
+        case 82 : _putws(L"82"); // fallthrough
         default : _putws(L"default"); break;
     }
 
@@ -44,9 +44,9 @@ int main(void) {
 
     int z = x + abs(powl(x, M_PI));
     switch (x) {
-        case 86 : _putws(L"86");     // fallthrough
-        case 85 : _putws(L"85");     // fallthrough
-        case 84 : _putws(L"84");     // fallthrough
+        case 86 : _putws(L"86"); // fallthrough
+        case 85 : _putws(L"85"); // fallthrough
+        case 84 : _putws(L"84"); // fallthrough
         case 83 : _putws(L"83"); break;
         // z is not an integer constant expression (ICE).
         case z  : _putws(L"82"); // fallthrough

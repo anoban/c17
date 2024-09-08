@@ -2,7 +2,7 @@
 #include <Windows.h>
 
 int wmain(void) {
-    HANDLE        handle = CreateFileW(L"./helloworld.txt", GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, NULL);
+    HANDLE handle = CreateFileW(L"./helloworld.txt", GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, NULL);
 
     LARGE_INTEGER file_size;
     GetFileSizeEx(handle, &file_size);

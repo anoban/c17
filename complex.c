@@ -20,7 +20,7 @@
 static inline _Lcomplex sqrtreal(long double value) {
     return (value < 0.0L) ?
                (_Lcomplex) {
-                   ._Val = {0.0L, sqrtl(-value)}
+                   ._Val = { 0.0L, sqrtl(-value) }
     } :
                (_Lcomplex) { ._Val = { 0.0L, sqrtl(value) } };
 }

@@ -6,7 +6,6 @@ struct { // anonymous struct
         unsigned             _len;
 } name = { ._str = L"Anoban", ._len = 7 };
 
-
 int wmain(_In_ int kwargcount, _In_count_(argc) wchar_t* kwargs[], _In_ wchar_t* envvars[]) {
     wprintf_s(L"argc = %2d\n", kwargcount);
 

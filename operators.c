@@ -12,7 +12,7 @@ int main(void) {
     wprintf_s(L"SHRT_MAX is %hd\n", SHRT_MAX);
     wprintf_s(L"SHRT_MAX++ is %d\n", number++);
     --number;
-    wprintf_s(L"++SHRT_MAX is %d\n", ++number);                          // %hd will show the result as -SHRT_MAX, wrap around addition :)
+    wprintf_s(L"++SHRT_MAX is %d\n", ++number); // %hd will show the result as -SHRT_MAX, wrap around addition :)
 
     int a, b = 6748, c, d;
 

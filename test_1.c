@@ -6,10 +6,10 @@ typedef struct {
 
 int main(void) {
     faves_t Languages = {
-        .names = {"Python", "C", "Fortran", "x86-64 asm"}
+        .names = { "Python", "C", "Fortran", "x86-64 asm" }
     };
     faves_t Tech = {
-        .names = {"Win32", "MSVC", "oneAPI", "CUDA"}
+        .names = { "Win32", "MSVC", "oneAPI", "CUDA" }
     };
 
     for (int i = 0; i < 4; ++i) printf_s("%s, %s\n", Languages.names[i], Tech.names[i]);

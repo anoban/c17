@@ -152,7 +152,7 @@ int wmain(void) {
     uint64_t       nbytes   = 0;
     const uint8_t* contents = open(L"moby_dick.txt", &nbytes);
 
-    huffman_t      hftree;
+    huffman_t hftree;
 
     initialize_frequency_table(&hftree, contents, nbytes);
 
@@ -187,7 +187,7 @@ int wmain(void) {
     // First N nodes in huffman_tree will be leaf nodes.
     // Initialize the leaf nodes. Works good :)
 
-    uint64_t       writecaret  = 0; // A caret to track the offset of the last initialized node in the huffman tree (node_t array).
+    uint64_t writecaret        = 0; // A caret to track the offset of the last initialized node in the huffman tree (node_t array).
     for (uint64_t i = firstnzbytepos; /* Start from the first byte with non-zero frequency */ i < 256; ++i) {
         huffman_tree[writecaret].byte   = sortedbytes[i];
         huffman_tree[writecaret].weight = frequencies[sortedbytes[i]];
@@ -216,10 +216,10 @@ int wmain(void) {
     huffman_tree[writecaret].byte   = NPTC;
     huffman_tree[writecaret].weight = huffman_tree[0].weight + huffman_tree[1].weight;
 
-    n_constructedlinks++;                               // First link node done.
+    n_constructedlinks++; // First link node done.
     writecaret++;
     n_linkedleaves += 2;
-    readcaret      += 2;                                // We've already read the first two leaf nodes. Don't worry about them anymore.
+    readcaret      += 2; // We've already read the first two leaf nodes. Don't worry about them anymore.
 
     // From all the nodes we have, find the two with the lowest frequencies, excluding the nodes that have been linked already.
 
@@ -246,7 +246,7 @@ int wmain(void) {
 
                 n_constructedlinks++;
             } else {
-                node_t* current = &huffman_tree[writecaret - 1];                 // Find the node with next smallest weight.
+                node_t* current = &huffman_tree[writecaret - 1]; // Find the node with next smallest weight.
                 for (uint64_t i = 0; i < writecaret; ++i)
                     if (current->weight < huffman_tree[i].weight) current = &huffman_tree[i];
 

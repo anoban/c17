@@ -38,18 +38,18 @@ typedef union xmmval {
 
         // One such register can hold either of these following arrays.
 
-        int8_t   mi8[16];
-        int16_t  mi16[8];
-        int32_t  mi32[4];
-        int64_t  mi64[2];
+        int8_t  mi8[16];
+        int16_t mi16[8];
+        int32_t mi32[4];
+        int64_t mi64[2];
 
         uint8_t  mu8[16];
         uint16_t mu16[8];
         uint32_t mu32[4];
         uint64_t mu64[2];
 
-        float    mf32[4];
-        double   mf64[2];
+        float  mf32[4];
+        double mf64[2];
 
 } xmm_t;
 
@@ -64,17 +64,17 @@ int main(void) {
     kathali.banana = true;
 
     union fishes dinner;
-    dinner.skate       = true;
+    dinner.skate      = true;
 
-    fish_t       lunch = { .tuna = true };
+    fish_t lunch      = { .tuna = true };
 
-    union xmmval xmm0  = {
-         .mi8 = {'a', 'n', 'o', 'b', 'a', 'n', '@', 'g', 'm', 'a', 'i', 'l', '.', 'c', 'o', 0}
+    union xmmval xmm0 = {
+        .mi8 = { 'a', 'n', 'o', 'b', 'a', 'n', '@', 'g', 'm', 'a', 'i', 'l', '.', 'c', 'o', 0 }
     };
 
     union arrays arr_0 = { .iarray = { 0 } };
     array_t      arr_1 = {
-             .iarray = {24, 76, 786, 8120}
+             .iarray = { 24, 76, 786, 8120 }
     };
 
     array_t arr_2;

@@ -2,7 +2,7 @@
 #include <heapapi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <synchapi.h>         // Sleep
+#include <synchapi.h> // Sleep
 
 #define MEMSIZE 1073741824LLU // that's 1 Gigabyte
 

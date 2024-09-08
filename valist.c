@@ -16,7 +16,7 @@ static inline double sumf(...) { // first argument must specify the number of ar
     // since C23, va_start() evaluates only the first argument, i.e va_start() macro can be invoked with a single argument
     va_start(args_ptr); // will map to __va_start(&args_ptr, 0); with /std:c23 flag
 
-                        // until we reach 0 (the last argument)
+    // until we reach 0 (the last argument)
     const unsigned argc = va_arg(args_ptr, unsigned);
     for (unsigned i = 0; i < argc; ++i) sum += va_arg(args_ptr, float);
     args_ptr = NULL; // equivalent to  va_end(args_ptr)

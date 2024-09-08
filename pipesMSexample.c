@@ -12,12 +12,12 @@ HANDLE g_hChildStd_OUT_Wr = NULL;
 
 HANDLE g_hInputFile       = NULL;
 
-void   CreateChildProcess(void);
-void   WriteToPipe(void);
-void   ReadFromPipe(void);
-void   ErrorExit(PTSTR);
+void CreateChildProcess(void);
+void WriteToPipe(void);
+void ReadFromPipe(void);
+void ErrorExit(PTSTR);
 
-int    _tmain(int argc, TCHAR* argv[]) {
+int _tmain(int argc, TCHAR* argv[]) {
     SECURITY_ATTRIBUTES saAttr;
 
     printf("\n->Start of parent execution.\n");
@@ -112,9 +112,9 @@ void CreateChildProcess()
         NULL,         // use parent's current directory
         &siStartInfo, // STARTUPINFO pointer
         &piProcInfo
-    );                // receives PROCESS_INFORMATION
+    ); // receives PROCESS_INFORMATION
 
-                                     // If an error occurs, exit the application.
+    // If an error occurs, exit the application.
     if (!bSuccess)
         ErrorExit(TEXT("CreateProcess"));
     else {

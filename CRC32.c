@@ -5,7 +5,7 @@
 void __forceinline __stdcall init_crc_table(_Inout_ uint32_t* restrict crc_table) {
     for (uint32_t i = 0; i <= UCHAR_MAX; ++i) { // each byte in the table.
         crc_table[i] = i;
-        for (uint32_t j = 0; j < 8; ++j) {      // each bit position in a byte
+        for (uint32_t j = 0; j < 8; ++j) { // each bit position in a byte
 
             // 0x1U is 0000 0000 0000 0000 0000 0000 0000 0001
             // if anything is to yield 0000 0000 0000 0000 0000 0000 0000 0000 with a bitwise and operation

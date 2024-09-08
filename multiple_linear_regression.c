@@ -7,7 +7,8 @@
 
 // build a model that can predict the fish weight (Perch) given its dimensions
 
-#define NROWS 56LLU
+#define NROWS          56LLU
+#define MAX_PREDICTORS 10LLU
 static const long double RAND_MAXF = 32767.0L; // (long double) RAND_MAX
 
 static const float weights[NROWS]  = { 5.9,  32.,  40.,  51.5, 70.,  100., 78.,  80.,   85.,  85.,   110.,  115.,  125.,  130.,
@@ -55,13 +56,27 @@ typedef struct coeffs {
 // Y_hat = w_len0 * length0 + w_len1 * length1 + w_len2 * length2 + w_h * height + w_w * width + b
 // we have 5 weights and a bias as model parameters
 
+// using variadics here is a dumb idea
 static inline coeffs_t __stdcall compute_derivatives(
-    _In_ const coeffs_t params, _In_ const size_t argc, ...
+    _In_ const coeffs_t                   params,
+    _In_count_(length) const float* const target,
+    _In_ const size_t                     length,
+    _In_ const size_t                     argc /* 5 */,
+    ... /* the five predictor arrays */
 
 ) {
-    coeffs_t temp = { 0.000 };
-    va_list  argv = NULL;
+    static const float* arrays[MAX_PREDICTORS] = { NULL }; // enough space to store 10 pointers
+    coeffs_t            temp                   = { 0.000 };
+
+    va_list argv                               = NULL;
     __va_start(&argv, argc);
+    for (size_t i = 0; i < argc; ++i) arrays[i] = va_arg(argv, const float*); // collect the predictors in `array`
+
+    long double dcost = 0.000L; // -(Y - Y_hat)
+    for (size_t i = 0; i < NROWS; ++i) {
+        //
+        dcost = ;
+    }
 }
 
 int wmain(void) {

@@ -14,7 +14,7 @@ int main(void) {
     const uint64_t offset_min = cblas_isamin_64(NUM_ELEMENTS, randoms, 1);
     const uint64_t offset_max = cblas_isamax_64(NUM_ELEMENTS, randoms, 1);
 
-    float          max = randoms[0], min = randoms[0];
+    float max = randoms[0], min = randoms[0];
     for (size_t i = 1; i < NUM_ELEMENTS; ++i) {
         if (randoms[i] < min) min = randoms[i];
         if (randoms[i] > max) max = randoms[i];

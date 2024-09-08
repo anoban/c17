@@ -26,7 +26,7 @@ typedef struct {
 
 void static __forceinline PrintBoard(char* board) {
     printf_s(
-        SETFOREGROUND                         SETBACKGROUND
+        SETFOREGROUND SETBACKGROUND
         "|-----------------|" RESETBACKGROUND SETBACKGROUND "|  %c  |  %c  |  %c  |" RESETBACKGROUND SETBACKGROUND
         "|-----------------|" RESETBACKGROUND SETBACKGROUND "|  %c  |  %c  |  %c  |" RESETBACKGROUND SETBACKGROUND
         "|-----------------|" RESETBACKGROUND SETBACKGROUND "|  %c  |  %c  |  %c  |" RESETBACKGROUND SETBACKGROUND

@@ -72,7 +72,7 @@ int wmain(void) {
     // which will make the syscall to ultimately terminate the current process!
 }
 
-#elif defined(_EXIT_DIRECTLY)        // what will happen if we call exit() directly
+#elif defined(_EXIT_DIRECTLY) // what will happen if we call exit() directly
 
     exit(EXIT_STATUS);
 }

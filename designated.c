@@ -21,7 +21,7 @@ int main(void) {
     // designated struct initializers.
     const user_t Jane = {
         .age = 34, .annual_salary = 12500.0564, .job = L"Accountant", .ismarried = true
-    };                       // declaration and initialization at once => definition
+    }; // declaration and initialization at once => definition
 
     user_t John;             // declaration
     John.age           = 32; // member initialization

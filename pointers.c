@@ -10,17 +10,17 @@ void static inline __stdcall means(_In_ int** arrays, _In_ int narrays, _In_ int
 }
 
 int main(void) {
-    const long double eps     = 0.0000000001L;
+    const long double eps = 0.0000000001L;
 
-    int               arr_0[] = { 0, 1, 2, 3 };
-    int               arr_1[] = { 1, 3, 5, 7, 9 };
-    int               arr_2[] = { 2, 4, 6, 8, 10, 12 };
-    int               arr_3[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+    int arr_0[]           = { 0, 1, 2, 3 };
+    int arr_1[]           = { 1, 3, 5, 7, 9 };
+    int arr_2[]           = { 2, 4, 6, 8, 10, 12 };
+    int arr_3[]           = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
 
-    int*              arrs[]  = { arr_0, arr_1, arr_2, arr_3 };
+    int* arrs[]           = { arr_0, arr_1, arr_2, arr_3 };
 
-    int               sizes[] = { 4, 5, 6, 10 };
-    float             mu[4]   = { 0 };
+    int   sizes[]         = { 4, 5, 6, 10 };
+    float mu[4]           = { 0 };
 
     means(arrs, 4, sizes, mu);
 

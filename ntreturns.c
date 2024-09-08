@@ -27,7 +27,7 @@ int main(void) {
     wchar_t                 pwszPath[CHAR_MAX]  = L"/??/D:/c17/iris.data"; // needs to be a fully qualified path
     UINT8                   bEaBuffer[CHAR_MAX] = { 0 };
     const OBJECT_ATTRIBUTES FileAttrs           = { .Length                   = sizeof(OBJECT_ATTRIBUTES),
-                                                    .RootDirectory            = nullptr,              // optional
+                                                    .RootDirectory            = nullptr, // optional
                                                     .ObjectName               = pwszPath,
                                                     .Attributes               = OBJ_CASE_INSENSITIVE, // why not, but not needed though
                                                     .SecurityDescriptor       = nullptr,              // optional

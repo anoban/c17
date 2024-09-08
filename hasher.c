@@ -52,7 +52,7 @@ bool __forceinline ReadTextFile(const wchar_t* file_name, char** stream, unsigne
 }
 
 int main(void) {
-    char*         buffer     = NULL;
+    char* buffer             = NULL;
     // printf_s("%s\n", buffer);
 
     unsigned long read_bytes = 0;

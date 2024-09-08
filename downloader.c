@@ -13,8 +13,8 @@ int wmain(int argc, wchar_t* argv[]) {
 
         SCRHANDLES scrHandles = HttpGet(wstrServer, wstrAccess);
 
-        DWORD64    dwNBytes   = 0;
-        LPSTR      pszBytes   = ReadHttpResponse(scrHandles, &dwNBytes);
+        DWORD64 dwNBytes      = 0;
+        LPSTR   pszBytes      = ReadHttpResponse(scrHandles, &dwNBytes);
 
         if (SaveBufferToDisk(pszBytes, dwNBytes, wstrFileName)) {
             // Once SaveBufferToDisk() is called with a bytes stream, the buffer will get freed

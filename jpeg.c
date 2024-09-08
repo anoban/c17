@@ -33,7 +33,7 @@ typedef struct {
         char     TYPE[5]; // "JFIF\0"
         uint8_t  VERSION_MAJOR;
         uint8_t  VERSION_MINOR;
-        uint8_t  UNITS;   // units for the x and y pixel densities.
+        uint8_t  UNITS; // units for the x and y pixel densities.
         // 0 means no densities are used.
         uint16_t XDENSITY;       // horizontal pixel density
         uint16_t YDENSITY;       // vertical pixel density

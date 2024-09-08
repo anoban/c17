@@ -15,7 +15,7 @@
 #define TOTAL_DISCS  50LLU // maximum discs allowed in a game
 #define MAX_DIAMATER 100   // maximum diameter a disc can have
 
-typedef struct board {     // the game board with three towers
+typedef struct board { // the game board with three towers
         int a[TOTAL_DISCS];
         int b[TOTAL_DISCS];
         int c[TOTAL_DISCS];
