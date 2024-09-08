@@ -117,17 +117,18 @@ int wmain(void) {
         parameters.w_h    -= ALPHA * derivatives.w_h;
         parameters.w_w    -= ALPHA * derivatives.w_w;
         parameters.b      -= ALPHA * derivatives.b;
-
-        wprintf_s(
-            L"inferred :: w_len0 = %.8Lf, w_len1 = %.8Lf, w_len2 = %.8Lf, w_h = %.8Lf, w_w = %.8Lf, b = %.8Lf\n",
-            parameters.w_len0,
-            parameters.w_len1,
-            parameters.w_len2,
-            parameters.w_h,
-            parameters.w_w,
-            parameters.b
-        );
     }
+
+    wprintf_s(
+        L"inferred :: w_len0 = %.8Lf, w_len1 = %.8Lf, w_len2 = %.8Lf, w_h = %.8Lf, w_w = %.8Lf, b = %.8Lf\n",
+        parameters.w_len0,
+        parameters.w_len1,
+        parameters.w_len2,
+        parameters.w_h,
+        parameters.w_w,
+        parameters.b
+    );
+    // sklearn says the weights must be -3.13022755 -38.50185035  42.91737643  65.65545803  64.90227432 & b = -556.5864743606669
 
     return EXIT_SUCCESS;
 }

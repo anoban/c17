@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-static const unsigned long long MAX_SIZE       = 10'000;
+static const unsigned long long MAX_SIZE       = 20'000;
 static const unsigned long long MAX_ITERATIONS = 1'000;
 static const long double        SLOPE          = 104.76415178263481;
 static const long double        INTERCEPT      = 2.76415178263481;
@@ -97,7 +97,7 @@ int wmain(void) {
     // boostrap a and b with two random values between 0.0 and 1.0
     long double learned_a = rand() / RAND_MAXF, learned_b = rand() / RAND_MAXF;
     wprintf_s(L"bootstrapped a = %2.10Lf, b = %2.10Lf\n", learned_a, learned_b);
-    pair_t derror = { 0.000 };
+    pair_t derror = { 0.000, 0.000 };
 
     // gradient descent
     for (size_t i = 0; i < MAX_ITERATIONS; ++i) {
