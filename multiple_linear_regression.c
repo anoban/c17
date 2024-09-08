@@ -1,15 +1,16 @@
-#include <assert.h>
-#include <math.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 // build a model that can predict the fish weight (Perch) given its dimensions
 
+#define MAX_ITERATIONS 50LLU
 #define NROWS          56LLU
-#define MAX_PREDICTORS 10LLU
+
+static const long double ALPHA     = 0.012500L;
 static const long double RAND_MAXF = 32767.0L; // (long double) RAND_MAX
+
+// NOLINTBEGIN(cppcoreguidelines-narrowing-conversions)
 
 static const float weights[NROWS]  = { 5.9,  32.,  40.,  51.5, 70.,  100., 78.,  80.,   85.,  85.,   110.,  115.,  125.,  130.,
                                        120., 120., 130., 135., 110., 130., 150., 145.,  150., 170.,  225.,  145.,  188.,  180.,
@@ -44,6 +45,8 @@ static const float width[NROWS]    = { 1.408,  1.9992, 2.432,  2.6316, 2.9415, 3
                                        4.7716, 6.018,  6.3875, 7.7957, 6.864,  6.7408, 6.2646, 6.3666, 7.4934, 6.003,  7.3514, 7.1064,
                                        7.225,  7.4624, 6.63,   6.8684, 7.2772, 7.4165, 8.142,  7.5958 };
 
+// NOLINTEND(cppcoreguidelines-narrowing-conversions)
+
 typedef struct coeffs {
         long double w_len0; // length 0
         long double w_len1;
@@ -56,39 +59,75 @@ typedef struct coeffs {
 // Y_hat = w_len0 * length0 + w_len1 * length1 + w_len2 * length2 + w_h * height + w_w * width + b
 // we have 5 weights and a bias as model parameters
 
-// using variadics here is a dumb idea
-static inline coeffs_t __stdcall compute_derivatives(
-    _In_ const coeffs_t                   params,
-    _In_count_(length) const float* const target,
-    _In_ const size_t                     length,
-    _In_ const size_t                     argc /* 5 */,
-    ... /* the five predictor arrays */
+static inline coeffs_t __stdcall compute_derivatives(_In_ const coeffs_t* const params) {
+    coeffs_t    temp  = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
+    long double dcost = 0.000L; // (Y_i - Y_hat_i)
 
-) {
-    static const float* arrays[MAX_PREDICTORS] = { NULL }; // enough space to store 10 pointers
-    coeffs_t            temp                   = { 0.000 };
-
-    va_list argv                               = NULL;
-    __va_start(&argv, argc);
-    for (size_t i = 0; i < argc; ++i) arrays[i] = va_arg(argv, const float*); // collect the predictors in `array`
-
-    long double dcost = 0.000L; // -(Y - Y_hat)
     for (size_t i = 0; i < NROWS; ++i) {
-        //
-        dcost = ;
+        dcost        = weights[i] - (params->w_len0 * length_0[i] + params->w_len1 * length_1[i] + params->w_len2 * length_2[i] +
+                              params->w_h * height[i] + params->w_w * width[i] + params->b);
+
+        temp.w_len0 -= dcost * length_0[i]; // -(Y_i - Y_hat_i) * length0_i
+        temp.w_len1 -= dcost * length_1[i]; // -(Y_i - Y_hat_i) * length1_i
+        temp.w_len2 -= dcost * length_2[i]; // -(Y_i - Y_hat_i) * length2_i
+        temp.w_h    -= dcost * height[i];   // -(Y_i - Y_hat_i) * height_i
+        temp.w_w    -= dcost * width[i];    // -(Y_i - Y_hat_i) * width_i
+        temp.b      -= dcost;               // -(Y_i - Y_hat_i)
     }
+
+    temp.w_len0 /= NROWS;
+    temp.w_len1 /= NROWS;
+    temp.w_len2 /= NROWS;
+    temp.w_h    /= NROWS;
+    temp.w_w    /= NROWS;
+    temp.b      /= NROWS;
+
+    return temp;
 }
 
 int wmain(void) {
     srand((unsigned) time(NULL));
 
     // bootstrap the model parameters
-    coeffs_t params = { .w_len0 = rand() / RAND_MAXF,
-                        .w_len1 = rand() / RAND_MAXF,
-                        .w_len2 = rand() / RAND_MAXF,
-                        .w_h    = rand() / RAND_MAXF,
-                        .w_w    = rand() / RAND_MAXF,
-                        .b      = rand() / RAND_MAXF };
+    coeffs_t parameters = { .w_len0 = rand() / RAND_MAXF,
+                            .w_len1 = rand() / RAND_MAXF,
+                            .w_len2 = rand() / RAND_MAXF,
+                            .w_h    = rand() / RAND_MAXF,
+                            .w_w    = rand() / RAND_MAXF,
+                            .b      = rand() / RAND_MAXF };
+    wprintf_s(
+        L"bootstrapped :: w_len0 = %.8Lf, w_len1 = %.8Lf, w_len2 = %.8Lf, w_h = %.8Lf, w_w = %.8Lf, b = %.8Lf\n",
+        parameters.w_len0,
+        parameters.w_len1,
+        parameters.w_len2,
+        parameters.w_h,
+        parameters.w_w,
+        parameters.b
+    );
+
+    coeffs_t derivatives = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
+
+    for (size_t i = 0; i < MAX_ITERATIONS; ++i) { // gradient descent
+        derivatives        = compute_derivatives(&parameters);
+
+        // parameter updates
+        parameters.w_len0 -= ALPHA * derivatives.w_len0;
+        parameters.w_len1 -= ALPHA * derivatives.w_len1;
+        parameters.w_len2 -= ALPHA * derivatives.w_len2;
+        parameters.w_h    -= ALPHA * derivatives.w_h;
+        parameters.w_w    -= ALPHA * derivatives.w_w;
+        parameters.b      -= ALPHA * derivatives.b;
+
+        wprintf_s(
+            L"inferred :: w_len0 = %.8Lf, w_len1 = %.8Lf, w_len2 = %.8Lf, w_h = %.8Lf, w_w = %.8Lf, b = %.8Lf\n",
+            parameters.w_len0,
+            parameters.w_len1,
+            parameters.w_len2,
+            parameters.w_h,
+            parameters.w_w,
+            parameters.b
+        );
+    }
 
     return EXIT_SUCCESS;
 }

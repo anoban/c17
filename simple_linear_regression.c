@@ -78,7 +78,7 @@ static inline pair_t __stdcall deriv_cost(
     long double dcost_w = 0.0000, dcost_b = 0.0000, dcost = 0.000;
 
     for (size_t i = 0; i < length; ++i) {
-        dcost    = y[i] - (x[i] * a + b); // -(Y_i - Y_hat_i)
+        dcost    = y[i] - (x[i] * a + b); //  (Y_i - Y_hat_i)
         dcost_b -= dcost;                 // -(Y_i - Y_hat_i)
         dcost_w -= (dcost * x[i]);        // -(Y_i - Y_hat_i) * x_i
     }
