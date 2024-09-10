@@ -1,11 +1,13 @@
+#ifndef __llvm__
+    #error NEED AN LLVM BASED COMPILER FOR C23 SUPPORT
+#endif
+
 #define _USE_MATH_DEFINES
 #include <assert.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-// FUCK GCC THOUGH :)
 
 // functions taking variadic number of arguments (optional)
 // these arguments can be of the same type or of different types
@@ -32,13 +34,14 @@ static inline long double __stdcall sum(_In_ const unsigned long long argc, _In_
 
 // expects the last optional argument to be 0
 static inline long double __stdcall fprod(_In_opt_...) {
-    char*       argptr = NULL;
-    long double result = 1.0000L;
+    va_list     argsptr = NULL;
+    long double result  = 1.0000L;
 
-    __va_start(&argptr, 1);
-    while (*argptr) result *= *(float*) (argptr += sizeof(float) - sizeof(float));
+    __va_start(&argsptr, 1);
+    const unsigned argc = va_arg(argsptr, unsigned);
+    for (unsigned i = 0; i < argc; ++i) result *= va_arg(argsptr, double);
+    argsptr = NULL;
 
-    argptr = NULL;
     return result;
 }
 
@@ -256,10 +259,11 @@ int wmain(void) {
             2222,
             1685);
 
-    wprintf_s(L"sum is %Lf\n", total); // 479
-    wprintf_s(L"sum is %Lf\n", tot);   // 123470
+    wprintf_s(L"sum is %Lf (479)\n", total);  // 479
+    wprintf_s(L"sum is %Lf (123470)\n", tot); // 123470
 
     const long double product = fprod(
+        100,
         96.29710262,
         62.86520639,
         4.85969941,
@@ -359,11 +363,10 @@ int wmain(void) {
         50.2983636,
         42.00310597,
         37.94467582,
-        47.07536474,
-        0 // va_list traversal terminates @ a NULL arg
+        47.07536474
     );
 
-    wprintf_s(L"sum is %E\n", product); // 3.6935101603501606E+161
+    wprintf_s(L"sum is %LE (3.6935101603501606E+161)\n", product); // 3.6935101603501606E+161
 
     return EXIT_SUCCESS;
 }

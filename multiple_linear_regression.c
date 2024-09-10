@@ -7,8 +7,8 @@
 #define MAX_ITERATIONS 50LLU
 #define NROWS          56LLU
 
-static const long double ALPHA     = 0.012500L;
-static const long double RAND_MAXF = 32767.0L; // (long double) RAND_MAX
+static const long double ALPHA     = 0.012500L; // learning rate
+static const long double RAND_MAXF = 32767.0L;  // (long double) RAND_MAX
 
 // NOLINTBEGIN(cppcoreguidelines-narrowing-conversions)
 
@@ -60,30 +60,35 @@ typedef struct coeffs {
 // we have 5 weights and a bias as model parameters
 
 static inline coeffs_t __stdcall compute_derivatives(_In_ const coeffs_t* const params) {
-    coeffs_t    temp  = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
-    long double dcost = 0.000L; // (Y_i - Y_hat_i)
+    coeffs_t    accumulator = { 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
+    long double dcost       = 0.000L; // (Y_i - Y_hat_i)
 
     for (size_t i = 0; i < NROWS; ++i) {
-        dcost        = weights[i] - (params->w_len0 * length_0[i] + params->w_len1 * length_1[i] + params->w_len2 * length_2[i] +
+        dcost               = weights[i] - (params->w_len0 * length_0[i] + params->w_len1 * length_1[i] + params->w_len2 * length_2[i] +
                               params->w_h * height[i] + params->w_w * width[i] + params->b);
 
-        temp.w_len0 -= dcost * length_0[i]; // -(Y_i - Y_hat_i) * length0_i
-        temp.w_len1 -= dcost * length_1[i]; // -(Y_i - Y_hat_i) * length1_i
-        temp.w_len2 -= dcost * length_2[i]; // -(Y_i - Y_hat_i) * length2_i
-        temp.w_h    -= dcost * height[i];   // -(Y_i - Y_hat_i) * height_i
-        temp.w_w    -= dcost * width[i];    // -(Y_i - Y_hat_i) * width_i
-        temp.b      -= dcost;               // -(Y_i - Y_hat_i)
+        accumulator.w_len0 -= dcost * length_0[i]; // -(Y_i - Y_hat_i) * length0_i
+        accumulator.w_len1 -= dcost * length_1[i]; // -(Y_i - Y_hat_i) * length1_i
+        accumulator.w_len2 -= dcost * length_2[i]; // -(Y_i - Y_hat_i) * length2_i
+        accumulator.w_h    -= dcost * height[i];   // -(Y_i - Y_hat_i) * height_i
+        accumulator.w_w    -= dcost * width[i];    // -(Y_i - Y_hat_i) * width_i
+        accumulator.b      -= dcost;               // -(Y_i - Y_hat_i)
     }
 
-    temp.w_len0 /= NROWS;
-    temp.w_len1 /= NROWS;
-    temp.w_len2 /= NROWS;
-    temp.w_h    /= NROWS;
-    temp.w_w    /= NROWS;
-    temp.b      /= NROWS;
+    //  accumulator.w_len0 /= NROWS;
+    //  accumulator.w_len1 /= NROWS;
+    //  accumulator.w_len2 /= NROWS;
+    //  accumulator.w_h    /= NROWS;
+    //  accumulator.w_w    /= NROWS;
+    //  accumulator.b      /= NROWS;
 
-    return temp;
+    // cost is sum :: (Y_i - Y_hat_i)^2 / 2
+    // i.e (-dcost)^2 / 2.000
+
+    return accumulator;
 }
+
+static inline long double cost(_In_ const coeffs_t* const restrict params) { }
 
 int wmain(void) {
     srand((unsigned) time(NULL));
@@ -110,7 +115,7 @@ int wmain(void) {
     for (size_t i = 0; i < MAX_ITERATIONS; ++i) { // gradient descent
         derivatives        = compute_derivatives(&parameters);
 
-        // parameter updates
+        // simultaneous parameter updates
         parameters.w_len0 -= ALPHA * derivatives.w_len0;
         parameters.w_len1 -= ALPHA * derivatives.w_len1;
         parameters.w_len2 -= ALPHA * derivatives.w_len2;
@@ -128,7 +133,9 @@ int wmain(void) {
         parameters.w_w,
         parameters.b
     );
-    // sklearn says the weights must be -3.13022755 -38.50185035  42.91737643  65.65545803  64.90227432 & b = -556.5864743606669
+
+    // sklearn.linear_model.LinearRegression says the weights must be
+    // -3.13022755, -38.50185035, 42.91737643, 65.65545803, 64.90227432 & the bias must be -556.5864743606669
 
     return EXIT_SUCCESS;
 }
