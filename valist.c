@@ -54,7 +54,7 @@ int wmain(void) {
     // because arguments will be promoted to 'double'
     wprintf_s(L"sum is = %lf\n", sixty);
 
-    const long double ssixty = ssum(10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 0);
+    const long double ssixty = ssum(10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 0);// parse arguments untill NULL logic does no
     wprintf_s(L"sum is = %lf\n", ssixty);
 
     return EXIT_SUCCESS;

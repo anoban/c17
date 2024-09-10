@@ -1,23 +1,33 @@
-#define _AMD64_
-#include <heapapi.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <synchapi.h> // Sleep
+#include <heap.h>
 
-#define MEMSIZE 1073741824LLU // that's 1 Gigabyte
+static inline bool compare(_In_ const void* const restrict child, _In_ const void* const restrict parent) {
+    return (*(unsigned*) child > *(unsigned*) parent) ? true : false;
+}
 
-// https://learn.microsoft.com/en-us/windows/win32/memory/getting-process-heaps
+int wmain(void) {
+    heap_t heap = { 0 };
+    heap_init(&heap, compare);
 
-int main(void) {
-    const size_t nProcHeaps = GetProcessHeaps(0, NULL);
-    wprintf_s(L"This process has %zu heaps\n", nProcHeaps);
-    const HANDLE64 hDefaultProcHeap = GetProcessHeap();
-    void* const    memory           = HeapAlloc(hDefaultProcHeap, 0, MEMSIZE);
+    unsigned* ptr_0 = malloc(sizeof(unsigned));
+    unsigned* ptr_1 = malloc(sizeof(unsigned));
+    assert(ptr_0);
+    assert(ptr_1);
+    *ptr_0              = 9;
+    *ptr_1              = 19;
 
-    // without memset, the kernel wouldn't have given this process the 1 Gig memory it asked for.
-    memset(memory, 255U, MEMSIZE);
+    unsigned* retrieved = NULL;
 
-    Sleep(60000); // now that's one minute
-    HeapFree(hDefaultProcHeap, 0, memory);
+    heap_push(&heap, ptr_0);
+    heap_push(&heap, ptr_1);
+
+    heap_pop(&heap, &retrieved);
+    wprintf_s(L"%u\n", *retrieved); // should print 19
+    *retrieved = 0;
+
+    heap_pop(&heap, &retrieved);
+    wprintf_s(L"%u\n", *retrieved); // should print 9
+
+    // heap_clean(&heap);
+
     return EXIT_SUCCESS;
 }
