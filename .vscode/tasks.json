@@ -16,14 +16,18 @@
                 "/Gw",
                 "/I./",
                 "/MP",
+                "/MTd",
                 "/Qpar",
                 "/Zc:preprocessor",
                 "/Zi",
                 "/nologo",
                 "/TC",
                 "/Wall",
+                "/wd4710", // not inlined
+                "/wd4711", // selected for inlining
+                "/wd4820", // struct padding
                 "/Od",
-                "/std:c17",
+                "/std:clatest",
                 "/Fe${fileDirname}/${fileBasenameNoExtension}.exe",
                 "${file}",
                 "/link /DEBUG:full"

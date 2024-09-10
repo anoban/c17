@@ -24,7 +24,7 @@ int wmain(void) {
     wprintf_s(L"%u\n", *retrieved); // should print 19
     *retrieved = 0;
 
-    heap_pop(&heap, &retrieved);
+    heap_pop(&heap, &retrieved);    // SOMETHING'S WRONG HERE!!!
     wprintf_s(L"%u\n", *retrieved); // should print 9
 
     // heap_clean(&heap);

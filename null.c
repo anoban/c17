@@ -1,8 +1,12 @@
 #include <stdint.h>
+#include <stdlib.h>
 
 int main(void) {
-    int64_t* integerptr = (int64_t*) 4518789789;
-    int64_t* nullptr    = NULL;
-    int64_t deref       = *integerptr;
-    return 0;
+    [[maybe_unused]] int64_t* integerptr = (int64_t*) 4518789789;
+    [[maybe_unused]] int64_t* null       = NULL;
+    [[maybe_unused]] int64_t  deref      = *integerptr;
+
+    [[maybe_unused]] const void* ptr     = nullptr; // MSVC still doesn't support nullptr :(
+
+    return EXIT_SUCCESS;
 }
