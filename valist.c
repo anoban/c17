@@ -9,7 +9,7 @@
 #define __TOSTR(EXPANDED_MACRO)     #EXPANDED_MACRO
 #define TO_STRING(UNEXPANDED_MACRO) __TOSTR(UNEXPANDED_MACRO)
 
-static inline double sum(_In_opt_...) { // first argument must specify the number of args to sum
+static inline double __stdcall sum(_In_opt_...) { // first argument must specify the number of args to sum
     // since variadic arguments do not have a prespecified type, they MUST USE default types when dereferenced inside functions using
     // the argument pointer i.e integer arguments must be dereferenced as int or unsigned int
     // and floating point arguments must be dereferenced as double!!!
@@ -27,16 +27,18 @@ static inline double sum(_In_opt_...) { // first argument must specify the numbe
     return sum;
 }
 
-static inline long double ssum(_In_opt_...) {
+static inline long double __stdcall ssum(_In_opt_...) {
     char*       argv   = nullptr;
     long double result = 0.0000;
 
     wprintf_s(L"%0X\n", argv);
     __va_start(&argv, 0); // capture the first argument pointer
     wprintf_s(L"%0X\n", argv);
+    // wprintf_s(L"%Lf\n", *(double*) argv);
 
     // until the argument is NULL (0), continue to process the arguments and sum them
-    while (*((int*) argv)) {
+    // while (*((int*) argv))
+    for (unsigned i = 0; i < 6; ++i) { // works :)
         wprintf_s(L"sum is = %Lf\n", result);
         result += *((double*) argv);
         argv   += 8;
