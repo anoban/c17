@@ -51,5 +51,8 @@ int main(void) {
     printf_s("%.10Lf 6.3764527645\n", *willbe_y);
     printf_s("%lu 12345\n", *willbe_x);
 
+    // const double*       ptr  = &3.14765847; // cannot do this in C or C++
+    // const double* const _ptr = &3.14765847;
+
     return EXIT_SUCCESS;
 }
