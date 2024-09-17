@@ -21,6 +21,7 @@ $cflags = @(
     "/diagnostics:caret",
     "/DNDEBUG",
     "/D_NDEBUG",
+    "/experimental:c11atomics", # need this for <stdatomic.h>
     "/F0x10485100",
     "/favor:INTEL64",
     "/fp:strict",
