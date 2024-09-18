@@ -28,22 +28,32 @@ typedef _Atomic struct user {
         // 7 bytes padding here
 } user_t;
 
-static_assert(sizeof(user_t) == 96);
+static_assert(offsetof(struct user, name) == 0);
+static_assert(offsetof(struct user, occupation) == 40);
+static_assert(offsetof(struct user, title) == 60);
+static_assert(offsetof(struct user, age) == 72);
+static_assert(offsetof(struct user, annual_income) == 80);
+static_assert(offsetof(struct user, marital_status) == 88);
+// static_assert(sizeof(user_t) == 96);
 
 int wmain(void) {
     atomic_flag atflag = { false }; // ._Val is a MS implementation specific member designator
 
-    _Atomic struct A { // inline declaration
+    _Atomic struct i32_array { // inline declaration
             int a[100];
-    } a = { 0 };
+    } arr;
 
-    _Atomic struct B {
+    _Atomic struct pair {
             int x, y;
-    } b;
+    } tuple;
 
     count = 1000;
-    wprintf_s(L"atomic_is_lock_free? %s\n", atomic_is_lock_free(&count) ? L"yes" : L"no");
-    wprintf_s(L"atomic_is_lock_free? %s\n", atomic_is_lock_free(&a) ? L"yes" : L"no");
-    wprintf_s(L"atomic_is_lock_free? %s\n", atomic_is_lock_free(&b) ? L"yes" : L"no");
+    user_t jessie;
+
+    wprintf_s(L"atomic_is_lock_free? %s\n", atomic_is_lock_free(&count) ? L"yes" : L"no");  // long long
+    wprintf_s(L"atomic_is_lock_free? %s\n", atomic_is_lock_free(&jessie) ? L"yes" : L"no"); // user_t
+    wprintf_s(L"atomic_is_lock_free? %s\n", atomic_is_lock_free(&arr) ? L"yes" : L"no");    // i32_array
+    wprintf_s(L"atomic_is_lock_free? %s\n", atomic_is_lock_free(&tuple) ? L"yes" : L"no");  // pair
+
     return EXIT_SUCCESS;
 }
