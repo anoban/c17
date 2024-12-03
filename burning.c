@@ -13,8 +13,8 @@
 LRESULT CALLBACK PanelProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-HINSTANCE g_hinst;
-LRESULT   g_pos = 150;
+HINSTANCE        g_hinst;
+LRESULT          g_pos = 150;
 
 int WINAPI
 wWinMain(HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance, [[maybe_unused]] PWSTR lpCmdLine, [[maybe_unused]] int nCmdShow) {
@@ -52,8 +52,8 @@ wWinMain(HINSTANCE hInstance, [[maybe_unused]] HINSTANCE hPrevInstance, [[maybe_
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    static HWND hwndTrack_0, hwndTrack_1, hwndTrack_2, hwndBurn;
-    WNDCLASSW   rwc = { 0 };
+    static HWND          hwndTrack_0, hwndTrack_1, hwndTrack_2, hwndBurn;
+    WNDCLASSW            rwc = { 0 };
 
     INITCOMMONCONTROLSEX InitCtrlEx;
 
@@ -158,12 +158,12 @@ LRESULT CALLBACK PanelProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     PAINTSTRUCT ps;
     RECT        rect, rect2;
 
-    wchar_t* cap[] = { L"75", L"150", L"225", L"300", L"375", L"450", L"525", L"600", L"675" };
+    wchar_t*    cap[] = { L"75", L"150", L"225", L"300", L"375", L"450", L"525", L"600", L"675" };
 
-    HDC hdc;
-    int till;
-    int step, full;
-    int i;
+    HDC         hdc;
+    int         till;
+    int         step, full;
+    int         i;
 
     switch (msg) {
         case WM_PAINT :

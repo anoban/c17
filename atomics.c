@@ -28,7 +28,7 @@ typedef _Atomic(struct user {
     double   annual_income;
     bool     marital_status;
     // 7 bytes padding here
-}) user_t;
+})           user_t;
 
 static_assert(offsetof(struct user, name) == 0);
 static_assert(offsetof(struct user, occupation) == 40);
@@ -36,15 +36,16 @@ static_assert(offsetof(struct user, title) == 60);
 static_assert(offsetof(struct user, age) == 72);
 static_assert(offsetof(struct user, annual_income) == 80);
 static_assert(offsetof(struct user, marital_status) == 88);
+
 // static_assert(sizeof(user_t) == 96);
 
 int wmain(void) {
-    [[maybe_unused]] atomic_flag atflag = { false }; // ._Val is a MS implementation specific member designator
+    [[maybe_unused]] atomic_flag    atflag = { false }; // ._Val is a MS implementation specific member designator
 
     // inline anonymous struct
     _Atomic(struct { int a[100]; }) array;
 
-    _Atomic(struct { int x, y; }) ipair;
+    _Atomic(struct { int x, y; })   ipair;
 
     count = 1000;
     user_t jessie;

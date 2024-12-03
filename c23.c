@@ -18,7 +18,7 @@ int main(void) {
     for (size_t i = 0; i < 1000; ++i) array[i] = rand();
     [[maybe_unused]] const uint64_t _sum = sum(array, 100);
 
-    const uint64_t user                  = rand() % 4;
+    const uint64_t                  user = rand() % 4;
 
     switch (user) {
         case 1  : puts("That's one!"); [[fallthrough]];

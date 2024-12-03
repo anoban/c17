@@ -64,7 +64,7 @@ static inline void hex_dump(const _In_ uint64_t* buffer, const _In_ uint64_t buf
     const uint64_t wstrbuffsize           = sizeof(wchar_t) * buffsize * 4; // Excess, of course. Done deliberately.
     const uint64_t wstrbuffsize_in_wchars = wstrbuffsize / 2;
 
-    wchar_t* wstring_buffer               = malloc(wstrbuffsize);
+    wchar_t*       wstring_buffer         = malloc(wstrbuffsize);
     if (!wstring_buffer) { }; // hanlde it.
 
     memset(wstring_buffer, 0U, wstrbuffsize);

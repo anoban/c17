@@ -66,6 +66,7 @@ static inline uint8_t* open(_In_ const wchar_t* restrict file_name, _Out_ uint64
 // 2) Or one could annotate the self reference as a struct.
 
 #pragma pack(push, 8)
+
 typedef struct node_t {
         struct node_t* left;  // Zero
         struct node_t* right; // One
@@ -77,9 +78,11 @@ typedef struct node_t {
         uint64_t weight; // Frequency in the case of leaf nodes (nodes that directly represent bytes)
                          // Sum of the frequencies of child nodes, in the case of linking nodes.
 } node_t;
+
 #pragma pack(pop)
 
 #pragma pack(push, 8)
+
 typedef struct huffman_t {
         node_t   nodes[MAX_TOTAL_NODES]; // `an array of 256 node_t s.`
         uint64_t freqs[256];             // `an array holding the frequencies of each byte in the file.`
@@ -87,6 +90,7 @@ typedef struct huffman_t {
         uint64_t nleaves;                // `number of leaf nodes in the tree.`
         uint64_t nlinks;                 // `number of link nodes in the tree.`
 } huffman_t;
+
 #pragma pack(pop)
 
 // We won't be hooking up nodes without children to parents, so those variants need not to be here.
@@ -152,7 +156,7 @@ int wmain(void) {
     uint64_t       nbytes   = 0;
     const uint8_t* contents = open(L"moby_dick.txt", &nbytes);
 
-    huffman_t hftree;
+    huffman_t      hftree;
 
     initialize_frequency_table(&hftree, contents, nbytes);
 
@@ -187,7 +191,7 @@ int wmain(void) {
     // First N nodes in huffman_tree will be leaf nodes.
     // Initialize the leaf nodes. Works good :)
 
-    uint64_t writecaret        = 0; // A caret to track the offset of the last initialized node in the huffman tree (node_t array).
+    uint64_t       writecaret  = 0; // A caret to track the offset of the last initialized node in the huffman tree (node_t array).
     for (uint64_t i = firstnzbytepos; /* Start from the first byte with non-zero frequency */ i < 256; ++i) {
         huffman_tree[writecaret].byte   = sortedbytes[i];
         huffman_tree[writecaret].weight = frequencies[sortedbytes[i]];

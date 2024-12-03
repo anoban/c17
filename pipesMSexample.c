@@ -12,12 +12,12 @@ HANDLE g_hChildStd_OUT_Wr = NULL;
 
 HANDLE g_hInputFile       = NULL;
 
-void CreateChildProcess(void);
-void WriteToPipe(void);
-void ReadFromPipe(void);
-void ErrorExit(PTSTR);
+void   CreateChildProcess(void);
+void   WriteToPipe(void);
+void   ReadFromPipe(void);
+void   ErrorExit(PTSTR);
 
-int _tmain(int argc, TCHAR* argv[]) {
+int    _tmain(int argc, TCHAR* argv[]) {
     SECURITY_ATTRIBUTES saAttr;
 
     printf("\n->Start of parent execution.\n");

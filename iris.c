@@ -17,15 +17,15 @@ typedef struct {
 
 int main(void) {
     // There are 150 records in the text file.
-    iris_t* iris_array    = NULL;
+    iris_t* iris_array       = NULL;
 
     // read buffer.
-    char buffer[BUFFSIZE] = { 0 };
+    char    buffer[BUFFSIZE] = { 0 };
 
-    char* token           = NULL;
-    char* next_token      = NULL;
+    char*   token            = NULL;
+    char*   next_token       = NULL;
 
-    HANDLE hFile          = CreateFileW(L"./iris.data", GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE  hFile            = CreateFileW(L"./iris.data", GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (hFile != INVALID_HANDLE_VALUE) {
         DWORD dwBytesRead = 0;

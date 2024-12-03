@@ -6,11 +6,13 @@
 
 // without struct packing, using raw offsets caluclated using sizeof() on members won't help much when paddings are involved
 #pragma pack(push, 1)
+
 typedef struct packed {
         unsigned long x;
         long double   y;
         char          z[10];
 } packed_t;
+
 #pragma pack(pop)
 
 typedef struct regular {

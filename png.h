@@ -244,11 +244,11 @@ typedef struct {
 
 // prototypes.
 
-bool validate_png_signature(_In_ const uint8_t* restrict png_stream, _In_ const uint64_t fsize);
+bool           validate_png_signature(_In_ const uint8_t* restrict png_stream, _In_ const uint64_t fsize);
 
 PNG_CHUNK_HEAD extract_IHDR(_In_ const uint8_t* restrict png_stream, _In_ const uint64_t fsize);
 
-IHDR_DATA extract_IHDR_data(_In_ const PNG_CHUNK_HEAD ihdr_head);
+IHDR_DATA      extract_IHDR_data(_In_ const PNG_CHUNK_HEAD ihdr_head);
 
-void print_IHDR_info(_In_ const PNG_CHUNK_HEAD ihdr_head, _In_ const IHDR_DATA ihdr_data);
+void           print_IHDR_info(_In_ const PNG_CHUNK_HEAD ihdr_head, _In_ const IHDR_DATA ihdr_data);
 #endif // ! __PNG__

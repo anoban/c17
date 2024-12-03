@@ -127,7 +127,7 @@ LPSTR ReadHttpResponse(SCRHANDLES scrHandles, DWORD64* dwnReceivedBytes) {
     // last write offset, so the next write operation can start from there such that we can prevent
     // overwriting previously written memory.
 
-    LPSTR pszBuffer = (LPSTR) malloc(RESP_BUFF_SIZE);
+    LPSTR     pszBuffer = (LPSTR) malloc(RESP_BUFF_SIZE);
     // if malloc() failed,
     if (!pszBuffer) {
         fprintf_s(stderr, "Memory allocation failed. Error %ld\n", GetLastError());
@@ -137,7 +137,7 @@ LPSTR ReadHttpResponse(SCRHANDLES scrHandles, DWORD64* dwnReceivedBytes) {
     ZeroMemory(pszBuffer, RESP_BUFF_SIZE); // zero out the buffer.
     LPSTR pszLastWriteOffset = pszBuffer;
 
-    BOOL bReception          = FALSE;
+    BOOL  bReception         = FALSE;
     bReception               = WinHttpReceiveResponse(hRequest, NULL);
 
     if (!bReception) {

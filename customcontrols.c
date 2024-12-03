@@ -14,15 +14,15 @@
 #pragma comment(lib, "User32.lib")
 #pragma comment(lib, "Comctl32.lib")
 
-HINSTANCE hGlobalInstance;
-LRESULT   lGlobalPosition = 150;
+HINSTANCE        hGlobalInstance;
+LRESULT          lGlobalPosition = 150;
 
 LRESULT CALLBACK PanelProc(HWND hWindow, UINT uMessage, WPARAM wParameter, LPARAM lParameter) {
-    HBRUSH      hYellowBrush, hRedBrush, hOldBrush;
-    HPEN        hPen, hOldPen;
-    HFONT       hFont, hOldFont;
-    PAINTSTRUCT psPainter;
-    RECT        rOne, rTwo;
+    HBRUSH       hYellowBrush, hRedBrush, hOldBrush;
+    HPEN         hPen, hOldPen;
+    HFONT        hFont, hOldFont;
+    PAINTSTRUCT  psPainter;
+    RECT         rOne, rTwo;
 
     const WCHAR* pwszCaptions[] = { L"75", L"150", L"225", L"300", L"375", L"450", L"525", L"600", L"675" };
     HDC          hDeviceContext;

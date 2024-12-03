@@ -45,6 +45,7 @@
 // define the maximum number of devices you expec a system to have, defaulting to 64 seems a little far fetched
 
 static_assert(sizeof(struct cudaDeviceProp) == 1032); // because cudaDeviceProp is a really huge struct
+
 // imagine the size 64 such structs would take up on the stack
 
 // an error handler for CUDA runtime API calls

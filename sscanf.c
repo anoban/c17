@@ -3,12 +3,12 @@
 #include <string.h>
 
 int main(void) {
-    char     c;
-    uint64_t a;
-    float    b;
-    char     string[100] = { 0 };
+    char        c;
+    uint64_t    a;
+    float       b;
+    char        string[100] = { 0 };
 
-    const char* text     = "Hi, how are ya?. 4532; 67.653476358\n";
+    const char* text        = "Hi, how are ya?. 4532; 67.653476358\n";
     sscanf_s(text, "%c%[^.].%llu; %f\n", &c, 1U, string, 100U, &a, &b);
     printf_s("char = %c, uint64_t = %llu, float = %.15f, string = %s\n", c, a, b, string);
 

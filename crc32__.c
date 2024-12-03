@@ -3,12 +3,12 @@
 #include <Windows.h>
 
 uint8_t* open(_In_ const wchar_t* const restrict file_name, _Inout_ size_t* const restrict length) {
-    uint8_t* buffer       = NULL;
-    *length               = 0;
-    DWORD         nbytes  = 0;
-    LARGE_INTEGER liFsize = { .QuadPart = 0LLU };
+    uint8_t* buffer        = NULL;
+    *length                = 0;
+    DWORD          nbytes  = 0;
+    LARGE_INTEGER  liFsize = { .QuadPart = 0LLU };
 
-    const HANDLE64 hFile  = CreateFileW(file_name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, NULL);
+    const HANDLE64 hFile   = CreateFileW(file_name, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, NULL);
 
     if (hFile == INVALID_HANDLE_VALUE) {
         fwprintf_s(stderr, L"Error %lu in CreateFileW\n", GetLastError());

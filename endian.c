@@ -15,7 +15,7 @@ static inline unsigned long ulong_from_be_bytes(_In_reads_bytes_(4) const unsign
 
 static const unsigned char bytes[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
 
-int wmain(void) {
+int                        wmain(void) {
     wprintf_s(L"LE :: %llX\n", *(unsigned long long*) bytes);
     wprintf_s(L"BE :: %llX\n", ullong_from_be_bytes(bytes));
 

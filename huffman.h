@@ -61,9 +61,9 @@ static_assert(offsetof(code_t, code) == 2);
 typedef struct _heap {     // heap
         uint32_t count;    // number of nodes.
         uint32_t capacity; // number of nodes the heap can hold before requiring a reallocation.
-        bool (*fnptr_pred)(_In_ const void* const restrict, _In_ const void* const restrict);
-        void** tree; // a heap allocated array containing pointers to heap allocated nodes.
-                     // use malloc to allocate the tree and the nodes.
+        bool     (*fnptr_pred)(_In_ const void* const restrict, _In_ const void* const restrict);
+        void**   tree; // a heap allocated array containing pointers to heap allocated nodes.
+                       // use malloc to allocate the tree and the nodes.
 } heap_t;
 
 static_assert(sizeof(heap_t) == 24);
@@ -75,8 +75,8 @@ static_assert(offsetof(heap_t, tree) == 16);
 typedef struct _pque { // priority que
         uint32_t count;
         uint32_t capacity;
-        bool (*fnptr_pred)(_In_ const void* const restrict, _In_ const void* const restrict);
-        void** tree;
+        bool     (*fnptr_pred)(_In_ const void* const restrict, _In_ const void* const restrict);
+        void**   tree;
 } pque_t;
 
 static_assert(sizeof(pque_t) == 24);

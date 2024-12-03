@@ -86,12 +86,14 @@ static inline uint8_t* open_image(_In_ const wchar_t* restrict file_name, _Out_ 
 const uint16_t static SOBMP = ((uint16_t) 'M' << 8) | (uint16_t) 'B';
 
 #pragma pack(push, 1)
+
 typedef struct {
         uint16_t SOI; // BM
         uint32_t FSIZE;
         uint32_t RESERVED; // this is actually two consecutive 16 bit elements, but who cares :)
         uint32_t PIXELDATASTART;
 } __BITMAPFILEHEADER;
+
 #pragma pack(pop)
 
 // image header comes in two variants!
@@ -105,10 +107,13 @@ typedef struct {
 
 // types of compressions used in BMP files.
 #pragma pack(push, 4)
+
 typedef enum { RGB, RLE8, RLE4, BITFIELDS } BMPCOMPRESSIONKIND; // uint32_t
+
 #pragma pack(pop)
 
 #pragma pack(push, 2)
+
 typedef struct {
         uint32_t           HEADERSIZE; // >= 40 bytes.
         uint32_t           WIDTH;
@@ -123,6 +128,7 @@ typedef struct {
         uint32_t           NCMAPENTRIES; // number of entries in the colourmap that are used.
         uint32_t           NIMPCOLORS;   // number of important colors.
 } __BITMAPINFOHEADER;
+
 #pragma pack(pop)
 
 // a BMP with BITMAPCOREHEADER cannot be compressed.
@@ -139,12 +145,14 @@ typedef struct {
 // first two variants are used to map pixel data to RGB values, when the bit count is 1, 4 or 8.
 // these two variants are common in Windows BMP files.
 #pragma pack(push, 1)
+
 typedef struct {
         uint8_t BLUE;
         uint8_t GREEN;
         uint8_t RED;
         uint8_t RESERVED; // must be 0, but seems to be 0xFF in most BMPs, yikes!
 } ___RGBQUAD;
+
 #pragma pack(pop)
 
 // BMP files in OS/2 use the third variant

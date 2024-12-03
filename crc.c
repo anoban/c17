@@ -4,7 +4,7 @@
 
 static uint32_t crc32_table[256];
 
-void build_crc32_table(void) {
+void            build_crc32_table(void) {
     for (uint32_t i = 0; i < 256; i++) {
         uint32_t ch  = i;
         uint32_t crc = 0;

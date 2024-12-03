@@ -19,7 +19,7 @@
 
 NTSTATUS NTAPI NtTerminateProcess(_In_opt_ HANDLE hProcessHanlde, _In_ NTSTATUS lExitStatus); // undocumented by MS
 
-int main(void) {
+int            main(void) {
     // let's open and print the contents of a text file using only the native API
     // not using the C/C++ runtime
 
@@ -27,11 +27,11 @@ int main(void) {
     wchar_t                 pwszPath[CHAR_MAX]  = L"/??/D:/c17/iris.data"; // needs to be a fully qualified path
     UINT8                   bEaBuffer[CHAR_MAX] = { 0 };
     const OBJECT_ATTRIBUTES FileAttrs           = { .Length                   = sizeof(OBJECT_ATTRIBUTES),
-                                                    .RootDirectory            = nullptr, // optional
-                                                    .ObjectName               = pwszPath,
-                                                    .Attributes               = OBJ_CASE_INSENSITIVE, // why not, but not needed though
-                                                    .SecurityDescriptor       = nullptr,              // optional
-                                                    .SecurityQualityOfService = nullptr };
+                                                               .RootDirectory            = nullptr, // optional
+                                                               .ObjectName               = pwszPath,
+                                                               .Attributes               = OBJ_CASE_INSENSITIVE, // why not, but not needed though
+                                                               .SecurityDescriptor       = nullptr,              // optional
+                                                               .SecurityQualityOfService = nullptr };
     IO_STATUS_BLOCK         sbStatus            = { 0 };
 
     if (STATUS_SUCCESS != NtCreateFile(

@@ -62,20 +62,20 @@ static HANDLE hChildProcessStdout = NULL;
 // hThisProcessStdin and hChildProcessStdout form the two ends of one pipe.
 // hThisProcessStdout and hChildProcessStdin form the two ends of the other pipe.
 
-BOOL LaunchProcess(_In_ LPCWSTR pwszCommandLine) {
+BOOL          LaunchProcess(_In_ LPCWSTR pwszCommandLine) {
     // Create a child process that uses the previously created pipes as stdin & stderr
-    PROCESS_INFORMATION piChildProcInfo = { 0 };
-    const STARTUPINFOW  siChildProc     = { .cb         = sizeof(STARTUPINFO),
-                                            .hStdError  = hChildProcessStdout,
-                                            .hStdOutput = hChildProcessStdout,
-                                            .dwFlags    = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES,
-                                            .wShowWindow =
-                                                SW_HIDE }; // prevents cmd window from flashing. requires STARTF_USESHOWWINDOW in dwFlags.
+    PROCESS_INFORMATION piChildProcInfo        = { 0 };
+    const STARTUPINFOW  siChildProc            = { .cb         = sizeof(STARTUPINFO),
+                                                            .hStdError  = hChildProcessStdout,
+                                                            .hStdOutput = hChildProcessStdout,
+                                                            .dwFlags    = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES,
+                                                            .wShowWindow =
+                                                                SW_HIDE }; // prevents cmd window from flashing. requires STARTF_USESHOWWINDOW in dwFlags.
 
     // Lookup: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw
     // Passing the .exe's name in lpApplicationName causes error 2. "The system cannot find the file specified"
     // Pass the whole string to the lpCommandLine.
-    WCHAR pwszCommand[BUFF_SIZE]        = { 0 };
+    WCHAR               pwszCommand[BUFF_SIZE] = { 0 };
     wcscpy_s(pwszCommand, BUFF_SIZE, pwszCommandLine);
 
     const BOOL bSuccess = CreateProcessW(

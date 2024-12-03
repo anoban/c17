@@ -18,11 +18,12 @@
 double value = 0.000;
 
 static inline double __cdecl square(typeof(double) arg) { return arg * arg; }
+
 static inline double __cdecl cube(typeof(value) arg) { return arg * arg * arg; }
 
 static const typeof(M_PI) PI = M_PI;
 
-int main(void) {
+int                       main(void) {
     char* const string                    = "STRING LITERAL";
     string[0]                             = 's';
 

@@ -39,9 +39,9 @@ long double intSignedArraySum(char* array, uint64_t size, uint8_t stride) {
 }
 
 int main(void) {
-    int32_t array[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+    int32_t     array[] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
 
-    long double sum = 0.0;
+    long double sum     = 0.0;
     for (uint8_t stride = 1; stride < 9; stride *= 2) {
         sum = intSignedArraySum((char*) array, 10, stride);
         printf_s("Sum %10.5Lf when stride is %u\n", sum, stride);

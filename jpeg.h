@@ -42,6 +42,7 @@ typedef struct {
 
 // to be used in APP0 extension header.
 typedef enum { JPEG = 0x10, BYTE_PER_PIXEL, BYTES3_PER_PIXEL } JFIF_APP0EXT_THUMBNAIL_ENC;
+
 // 0x10 - thumbnail is encodes as JPEG.
 // 0x11 - thumbnail is encoded with one byte per pixel.
 // 0x12 - thumbnail is encoded with three bytes per pixel.

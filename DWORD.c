@@ -3,7 +3,7 @@
 typedef unsigned int DWORD;
 typedef void*        HANDLE;
 
-int main(void) {
+int                  main(void) {
     DWORD STD_INPUT_HANDLE  = -10;
     DWORD STD_OUTPUT_HANDLE = -11;
     DWORD STD_ERROR_HANDLE  = -12;

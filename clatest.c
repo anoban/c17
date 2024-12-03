@@ -12,9 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const size_t HUNDRED_THOUSAND_THOUSAND_WITH_DIGIT_SEPARATOS = 100'000'000;
+const size_t         HUNDRED_THOUSAND_THOUSAND_WITH_DIGIT_SEPARATOS = 100'000'000;
 
-const unsigned short SHRT_MAXX                              = 0b1111'1111'1111'1111;
+const unsigned short SHRT_MAXX                                      = 0b1111'1111'1111'1111;
 static_assert(0b1111'1111'1111'1111 == USHRT_MAX);
 
 [[nodiscard]] static inline long __stdcall square(_In_ const register long __val) { return __val * __val; }
@@ -25,8 +25,8 @@ static_assert(0b1111'1111'1111'1111 == USHRT_MAX);
 
 [[unsequenced, nodiscard, reproducible]] double areaofsun(void) { return 4.0000 / 3.00000000 * M_PI * powl(696340.0, 3.0000000000); }
 
-int wmain(void) {
-    const unsigned short smax                 = SHRT_MAX;
+int                                             wmain(void) {
+    const unsigned short               smax   = SHRT_MAX;
 
     [[maybe_unused]] const long double pipow2 = powl(M_PI, 2.00);
 
@@ -39,7 +39,7 @@ int wmain(void) {
     [[maybe_unused]] const typeof_unqual(smax) smin     = SHRT_MIN;
     [[maybe_unused]] const typeof_unqual(pipow2) picube = cube(M_PI);
 
-    [[maybe_unused]] typeof(smax) qualified             = 0;
+    [[maybe_unused]] typeof(smax)        qualified      = 0;
 
     // [[maybe_unused]] const void* _ptr                   = nullptr; // MSVC still has no support for nullptr!
 
