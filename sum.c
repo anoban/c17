@@ -30,64 +30,74 @@ typedef enum type { CHAR, UCHAR, SHORT, USHORT, LONG, ULONG, LONGLONG, ULONGLONG
 
 static long double __declspec(noinline) __stdcall sum(const type _argtype, const unsigned _argc, ...) {
     long double total = 0.000;
+    const char* _ptr  = NULL;
+    __va_start(&_ptr, _argc);
 
     switch (_argtype) {
         case UCHAR :
-            {
-                const unsigned char* _ptr = NULL;
-                __va_start(&_ptr, _argc);
-                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
-                break;
+
+            for (unsigned offset = 0; offset < _argc; ++offset) {
+                total += *(unsigned char*) _ptr;
+                _ptr++;
             }
+            break;
+
         case CHAR :
-            {
-                const char* _ptr = NULL;
-                __va_start(&_ptr, _argc);
-                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
-                break;
+
+            for (unsigned offset = 0; offset < _argc; ++offset) {
+                total += *(char*) _ptr;
+                _ptr++;
             }
+            break;
+
         case USHORT :
-            {
-                const unsigned short* _ptr = NULL;
-                __va_start(&_ptr, _argc);
-                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
-                break;
+
+            for (unsigned offset = 0; offset < _argc; ++offset) {
+                total += *(unsigned short*) _ptr;
+                _ptr  += 2; // _ptr is of type const char*
             }
+            break;
+
         case SHORT :
-            {
-                const short* _ptr = NULL;
-                __va_start(&_ptr, _argc);
-                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
-                break;
+
+            for (unsigned offset = 0; offset < _argc; ++offset) {
+                total += *(short*) _ptr;
+                _ptr  += 2;
             }
+            break;
+
         case ULONG :
-            {
-                const unsigned long* _ptr = NULL;
-                __va_start(&_ptr, _argc);
-                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
-                break;
+
+            for (unsigned offset = 0; offset < _argc; ++offset) {
+                total += *(unsigned long*) _ptr;
+                _ptr  += 4;
             }
+            break;
+
         case LONG :
-            {
-                const long* _ptr = NULL;
-                __va_start(&_ptr, _argc);
-                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
-                break;
+
+            for (unsigned offset = 0; offset < _argc; ++offset) {
+                total += *(long*) _ptr;
+                _ptr  += 4;
             }
+            break;
+
         case ULONGLONG :
-            {
-                const unsigned long long* _ptr = NULL;
-                __va_start(&_ptr, _argc);
-                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
-                break;
+
+            for (unsigned offset = 0; offset < _argc; ++offset) {
+                total += *(unsigned long long*) _ptr;
+                _ptr  += 8;
             }
+            break;
+
         case LONGLONG :
-            {
-                const long long* _ptr = NULL;
-                __va_start(&_ptr, _argc);
-                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
-                break;
+
+            for (unsigned offset = 0; offset < _argc; ++offset) {
+                total += *(long long*) _ptr;
+                _ptr  += 8;
             }
+            break;
+
         case FLOAT :
             {
                 const float* _ptr = NULL;
@@ -107,7 +117,7 @@ static long double __declspec(noinline) __stdcall sum(const type _argtype, const
     return total;
 }
 
-int wmain() {
+int wmain(void) {
     wprintf_s(
         L"sum of 8,58,31,45,41,48,10,8,30,61,55,41,33,67,23,85,50,16,48,18 is %.4Lf\n",
         isum(20, 8, 58, 31, 45, 41, 48, 10, 8, 30, 61, 55, 41, 33, 67, 23, 85, 50, 16, 48, 18) // 776???
@@ -146,6 +156,10 @@ int wmain() {
     wprintf(L"sum is %.5Lf\n", sum(CHAR, 10, 27I8, 66I8, -31I8, -15I8, 84I8, -100I8, 58I8, -128I8, 78I8, 113I8));
     wprintf(L"sum is %.5Lf\n", sum(USHORT, 10, 213UI16, 146UI16, 186UI16, 106UI16, 8UI16, 224UI16, 192UI16, 12UI16, 69UI16, 169UI16));
     wprintf(L"sum is %.5Lf\n", sum(SHORT, 10, 27I16, 66I16, -31I16, -15I16, 84I16, -100I16, 58I16, -128I16, 78I16, 113I16));
+    wprintf(L"sum is %.5Lf\n", sum(ULONG, 10, 213LU, 146LU, 186LU, 106LU, 8LU, 224LU, 192LU, 12LU, 69LU, 169LU));
+    wprintf(L"sum is %.5Lf\n", sum(LONG, 10, 27, 66, -31, -15, 84, -100, 58, -128, 78, 113));
+    wprintf(L"sum is %.5Lf\n", sum(ULONGLONG, 10, 213LLU, 146LLU, 186LLU, 106LLU, 8LLU, 224LLU, 192LLU, 12LLU, 69LLU, 169LLU));
+    wprintf(L"sum is %.5Lf\n", sum(LONGLONG, 10LL, 27LL, 66LL, -31LL, -15LL, 84LL, -100LL, 58LL, -128LL, 78LL, 113LL));
 
     return EXIT_SUCCESS;
 }
