@@ -8,8 +8,8 @@ long double isum(const unsigned _argcount, /* variadic arguments */...) {
     va_list     _argptr = NULL; // a char* to capture the ADDRESS of the first variadic argument
     va_start(_argptr, 0);       // capture the adddress of the first variadic argument on the stack
 
-    unsigned offset = 0;
-    while (offset++ < _argcount) total += va_arg(_argptr, int);
+    unsigned i = 0;
+    while (i++ < _argcount) total += va_arg(_argptr, int);
     va_end(_argptr);
     return total;
 }
@@ -35,40 +35,25 @@ static long double __declspec(noinline) __stdcall sum(const type _argtype, const
 
     switch (_argtype) {
         case UCHAR :
-
-            for (unsigned offset = 0; offset < _argc; ++offset) {
-                total += *(unsigned char*) _ptr;
-                _ptr++;
-            }
+            for (unsigned i = 0; i < _argc; ++i) total += ((unsigned char*) _ptr)[i];
             break;
 
         case CHAR :
-
-            for (unsigned offset = 0; offset < _argc; ++offset) {
-                total += *(char*) _ptr;
-                _ptr++;
-            }
+            for (unsigned i = 0; i < _argc; ++i) total += _ptr[i];
             break;
 
         case USHORT :
-
-            for (unsigned offset = 0; offset < _argc; ++offset) {
-                total += *(unsigned short*) _ptr;
-                _ptr  += 2; // _ptr is of type const char*
-            }
+            for (unsigned i = 0; i < _argc; ++i) total += ((unsigned short*) _ptr)[i];
             break;
 
         case SHORT :
 
-            for (unsigned offset = 0; offset < _argc; ++offset) {
-                total += *(short*) _ptr;
-                _ptr  += 2;
-            }
+            for (unsigned i = 0; i < _argc; ++i) total += ((short*) _ptr)[i];
             break;
 
         case ULONG :
 
-            for (unsigned offset = 0; offset < _argc; ++offset) {
+            for (unsigned i = 0; i < _argc; ++i) {
                 total += *(unsigned long*) _ptr;
                 _ptr  += 4;
             }
@@ -76,7 +61,7 @@ static long double __declspec(noinline) __stdcall sum(const type _argtype, const
 
         case LONG :
 
-            for (unsigned offset = 0; offset < _argc; ++offset) {
+            for (unsigned i = 0; i < _argc; ++i) {
                 total += *(long*) _ptr;
                 _ptr  += 4;
             }
@@ -84,7 +69,7 @@ static long double __declspec(noinline) __stdcall sum(const type _argtype, const
 
         case ULONGLONG :
 
-            for (unsigned offset = 0; offset < _argc; ++offset) {
+            for (unsigned i = 0; i < _argc; ++i) {
                 total += *(unsigned long long*) _ptr;
                 _ptr  += 8;
             }
@@ -92,7 +77,7 @@ static long double __declspec(noinline) __stdcall sum(const type _argtype, const
 
         case LONGLONG :
 
-            for (unsigned offset = 0; offset < _argc; ++offset) {
+            for (unsigned i = 0; i < _argc; ++i) {
                 total += *(long long*) _ptr;
                 _ptr  += 8;
             }
@@ -102,14 +87,14 @@ static long double __declspec(noinline) __stdcall sum(const type _argtype, const
             {
                 const float* _ptr = NULL;
                 __va_start(&_ptr, _argc);
-                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
+                for (unsigned i = 0; i < _argc; ++i) total += *_ptr++;
                 break;
             }
         case DOUBLE :
             {
                 const double* _ptr = NULL;
                 __va_start(&_ptr, _argc);
-                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
+                for (unsigned i = 0; i < _argc; ++i) total += *_ptr++;
                 break;
             }
     }
