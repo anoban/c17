@@ -32,19 +32,73 @@ static long double __declspec(noinline) __stdcall sum(const type _argtype, const
     long double total = 0.000;
 
     switch (_argtype) {
-        case UCHAR : [[fallthrough]];
-        case CHAR :
+        case UCHAR :
             {
-                const char* _ptr = NULL;
-                __va_start(&_ptr, 0);
+                const unsigned char* _ptr = NULL;
+                __va_start(&_ptr, _argc);
                 for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
                 break;
             }
-        case USHORT : [[fallthrough]];
+        case CHAR :
+            {
+                const char* _ptr = NULL;
+                __va_start(&_ptr, _argc);
+                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
+                break;
+            }
+        case USHORT :
+            {
+                const unsigned short* _ptr = NULL;
+                __va_start(&_ptr, _argc);
+                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
+                break;
+            }
         case SHORT :
             {
                 const short* _ptr = NULL;
-                __va_start(&_ptr, 0);
+                __va_start(&_ptr, _argc);
+                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
+                break;
+            }
+        case ULONG :
+            {
+                const unsigned long* _ptr = NULL;
+                __va_start(&_ptr, _argc);
+                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
+                break;
+            }
+        case LONG :
+            {
+                const long* _ptr = NULL;
+                __va_start(&_ptr, _argc);
+                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
+                break;
+            }
+        case ULONGLONG :
+            {
+                const unsigned long long* _ptr = NULL;
+                __va_start(&_ptr, _argc);
+                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
+                break;
+            }
+        case LONGLONG :
+            {
+                const long long* _ptr = NULL;
+                __va_start(&_ptr, _argc);
+                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
+                break;
+            }
+        case FLOAT :
+            {
+                const float* _ptr = NULL;
+                __va_start(&_ptr, _argc);
+                for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
+                break;
+            }
+        case DOUBLE :
+            {
+                const double* _ptr = NULL;
+                __va_start(&_ptr, _argc);
                 for (unsigned offset = 0; offset < _argc; ++offset) total += *_ptr++;
                 break;
             }
@@ -85,6 +139,13 @@ int wmain() {
             1.86500132
         )
     ); // 5026.801280741084????
+
+    // 1325!!!
+    wprintf(L"sum is %.5Lf\n", sum(UCHAR, 10, 213UI8, 146UI8, 186UI8, 106UI8, 8UI8, 224UI8, 192UI8, 12UI8, 69UI8, 169UI8));
+    // 152!!!
+    wprintf(L"sum is %.5Lf\n", sum(CHAR, 10, 27I8, 66I8, -31I8, -15I8, 84I8, -100I8, 58I8, -128I8, 78I8, 113I8));
+    wprintf(L"sum is %.5Lf\n", sum(USHORT, 10, 213UI16, 146UI16, 186UI16, 106UI16, 8UI16, 224UI16, 192UI16, 12UI16, 69UI16, 169UI16));
+    wprintf(L"sum is %.5Lf\n", sum(SHORT, 10, 27I16, 66I16, -31I16, -15I16, 84I16, -100I16, 58I16, -128I16, 78I16, 113I16));
 
     return EXIT_SUCCESS;
 }
