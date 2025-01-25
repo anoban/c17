@@ -159,7 +159,7 @@ int wmain(void) {
     wprintf(L"sum is %.5Lf\n", sum(ULONG, 10, 213LU, 146LU, 186LU, 106LU, 8LU, 224LU, 192LU, 12LU, 69LU, 169LU));
     wprintf(L"sum is %.5Lf\n", sum(LONG, 10, 27, 66, -31, -15, 84, -100, 58, -128, 78, 113));
     wprintf(L"sum is %.5Lf\n", sum(ULONGLONG, 10, 213LLU, 146LLU, 186LLU, 106LLU, 8LLU, 224LLU, 192LLU, 12LLU, 69LLU, 169LLU));
-    wprintf(L"sum is %.5Lf\n", sum(LONGLONG, 10LL, 27LL, 66LL, -31LL, -15LL, 84LL, -100LL, 58LL, -128LL, 78LL, 113LL));
+    wprintf(L"sum is %.5Lf\n", sum(LONGLONG, 10, 27LL, 66LL, -31LL, -15LL, 84LL, -100LL, 58LL, -128LL, 78LL, 113LL));
 
     return EXIT_SUCCESS;
 }
