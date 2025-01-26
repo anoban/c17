@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -90,6 +91,18 @@ static long double __declspec(noinline) __stdcall sum(const type _argtype, const
 // prototype
 static long double __declspec(noinline) __stdcall sum_v2(const type _argtype, const unsigned _argc, ...);
 
+static inline long long charsum(const unsigned long _argc, ...) {
+    long long total   = 0;
+    char*     _argptr = NULL;
+    __va_start(&_argptr, _argc);
+    assert(_argptr);
+    for (unsigned long i = 0; i < _argc; ++i) {
+        total += _argptr[i];
+        putchar(_argptr[i]);
+    }
+    return total;
+}
+
 int wmain(void) {
     wprintf_s(
         L"sum of 8,58,31,45,41,48,10,8,30,61,55,41,33,67,23,85,50,16,48,18 is %.4Lf\n",
@@ -153,6 +166,41 @@ int wmain(void) {
     wprintf(L"sum is %.5Lf\n", sum_v2(LONGLONG, 10, 27LL, 66LL, -31LL, -15LL, 84LL, -100LL, 58LL, -128LL, 78LL, 113LL));
     wprintf(L"sum is %.5Lf\n", sum_v2(FLOAT, 10, 27.00F, 66.00F, -31.00F, -15.00F, 84.00F, -100.00F, 58.00F, -128.00F, 78.00F, 113.00F));
     wprintf(L"sum is %.5Lf\n", sum_v2(DOUBLE, 10, 27.00, 66.00, -31.00, -15.00, 84.00, -100.00, 58.00, -128.00, 78.00, 113.00));
+
+    _putws(L"\n---------------------------------------------------------------\n");
+    wprintf(L"charsum is %10lld\n", charsum(10, 27I8, 66I8, -31I8, -15I8, 84I8, -100I8, 58I8, -128I8, 78I8, 113I8)); // 152???
+    wprintf(
+        L"charsum of a-z is %10lld\n",
+        charsum( // 2847
+            26,
+            'a',
+            'b',
+            'c',
+            'd',
+            'e',
+            'f',
+            'g',
+            'h',
+            'i',
+            'j',
+            'k',
+            'l',
+            'm',
+            'n',
+            'o',
+            'p',
+            'q',
+            'r',
+            's',
+            't',
+            'u',
+            'v',
+            'w',
+            'x',
+            'y',
+            'z'
+        )
+    );
 
     return EXIT_SUCCESS;
 }
