@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// prototype
+static long double __declspec(noinline) __stdcall sum_v2(const type _argtype, const unsigned _argc, ...);
+
 // i keep forgetting this!!! damn
 long double isum(const unsigned _argcount, /* variadic arguments */...) {
     long double total   = 0.0000;
@@ -47,54 +50,39 @@ static long double __declspec(noinline) __stdcall sum(const type _argtype, const
             break;
 
         case SHORT :
-
             for (unsigned i = 0; i < _argc; ++i) total += ((short*) _ptr)[i];
             break;
 
         case ULONG :
-
-            for (unsigned i = 0; i < _argc; ++i) {
-                total += *(unsigned long*) _ptr;
-                _ptr  += 4;
-            }
+            for (unsigned i = 0; i < _argc; ++i) total += ((unsigned long*) _ptr)[i];
             break;
 
         case LONG :
-
-            for (unsigned i = 0; i < _argc; ++i) {
-                total += *(long*) _ptr;
-                _ptr  += 4;
-            }
+            for (unsigned i = 0; i < _argc; ++i) total += ((long*) _ptr)[i];
             break;
 
         case ULONGLONG :
-
-            for (unsigned i = 0; i < _argc; ++i) {
-                total += *(unsigned long long*) _ptr;
-                _ptr  += 8;
-            }
+            for (unsigned i = 0; i < _argc; ++i)
+                total += ((unsigned long long*) _ptr)[i]; // NOLINT(cppcoreguidelines-narrowing-conversions)
             break;
 
         case LONGLONG :
-
-            for (unsigned i = 0; i < _argc; ++i) {
-                total += *(long long*) _ptr;
-                _ptr  += 8;
-            }
+            for (unsigned i = 0; i < _argc; ++i) total += ((long long*) _ptr)[i]; // NOLINT(cppcoreguidelines-narrowing-conversions)
             break;
 
         case FLOAT :
-            {
-                const float* _ptr = NULL;
-                __va_start(&_ptr, _argc);
-                for (unsigned i = 0; i < _argc; ++i) total += *_ptr++;
-                break;
-            }
+            // {
+            //     const float* _ptr = NULL;
+            //     __va_start(&_ptr, _argc);
+            //     for (unsigned i = 0; i < _argc; ++i) total += _ptr[i];
+            //     break;
+            // }
+            [[fallthrough]]; // WOW!!!
         case DOUBLE :
             {
                 const double* _ptr = NULL;
                 __va_start(&_ptr, _argc);
-                for (unsigned i = 0; i < _argc; ++i) total += *_ptr++;
+                for (unsigned i = 0; i < _argc; ++i) total += _ptr[i];
                 break;
             }
     }
@@ -146,5 +134,56 @@ int wmain(void) {
     wprintf(L"sum is %.5Lf\n", sum(ULONGLONG, 10, 213LLU, 146LLU, 186LLU, 106LLU, 8LLU, 224LLU, 192LLU, 12LLU, 69LLU, 169LLU));
     wprintf(L"sum is %.5Lf\n", sum(LONGLONG, 10, 27LL, 66LL, -31LL, -15LL, 84LL, -100LL, 58LL, -128LL, 78LL, 113LL));
 
+    _putws(L"\nreal numbers!\n");
+
+    wprintf(L"sum is %.5Lf\n", sum(FLOAT, 10, 27.00F, 66.00F, -31.00F, -15.00F, 84.00F, -100.00F, 58.00F, -128.00F, 78.00F, 113.00F));
+    wprintf(L"sum is %.5Lf\n", sum(DOUBLE, 10, 27.00, 66.00, -31.00, -15.00, 84.00, -100.00, 58.00, -128.00, 78.00, 113.00));
     return EXIT_SUCCESS;
+}
+
+static long double __declspec(noinline) __stdcall sum_v2(const type _argtype, const unsigned _argc, ...) {
+    long double total = 0.000;
+
+    switch (_argtype) {
+        // unsigned type group subject to type promotion
+        case UCHAR  : [[fallthrough]];
+        case USHORT : [[fallthrough]];
+        case ULONG :
+            {
+                const unsigned long* _ptr = NULL;
+                __va_start(&_ptr, _argc);
+                for (unsigned i = 0; i < _argc; ++i) total += _ptr[i];
+                break;
+            }
+            // signed type group subject to type promotion
+        case CHAR  : [[fallthrough]];
+        case SHORT : [[fallthrough]];
+        case LONG :
+            {
+                const long* _ptr = NULL;
+                __va_start(&_ptr, _argc);
+                for (unsigned i = 0; i < _argc; ++i) total += _ptr[i];
+                break;
+            }
+
+        case ULONGLONG :
+            for (unsigned i = 0; i < _argc; ++i)
+                total += ((unsigned long long*) _ptr)[i]; // NOLINT(cppcoreguidelines-narrowing-conversions)
+            break;
+
+        case LONGLONG :
+            for (unsigned i = 0; i < _argc; ++i) total += ((long long*) _ptr)[i]; // NOLINT(cppcoreguidelines-narrowing-conversions)
+            break;
+
+        case FLOAT : [[fallthrough]];
+        case DOUBLE :
+            {
+                const double* _ptr = NULL;
+                __va_start(&_ptr, _argc);
+                for (unsigned i = 0; i < _argc; ++i) total += _ptr[i];
+                break;
+            }
+    }
+
+    return total;
 }
