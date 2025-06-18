@@ -6,8 +6,11 @@
 #define VC_EXTRALEAN
 #include <windef.h>
 #include <wingdi.h>
+
 #include <stdlib.h>
 // clang-format on
+
+static const unsigned long long CIFAR10_NPIXELS_PER_IMAGE = 1024; // 32 x 32
 
 // since all the images are of the same resolution let's use the same file and info headers!
 static const BITMAPFILEHEADER CIFAR10_FHEAD   = { .bfType = 0, .bfSize = 0, .bfReserved1 = 0, .bfReserved2 = 0, .bfOffBits = 0 };
